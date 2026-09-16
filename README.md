@@ -118,9 +118,11 @@ authentification.** Chacun peut changer d'étudiant.
 | Chemin | Contenu |
 |---|---|
 | `docs/enonce.md` | Besoin, données, règles RG-01 à RG-09, scénarios T01 à T12 |
+| `docs/analyse-initiale.md` | Note d'analyse initiale : problème, besoins, questions au département, risques, exercice individuel |
 | `docs/journal-decisions.md` | Décisions prises et propositions de l'IA corrigées, refusées ou précisées |
 | `docs/compte-rendu-recette.md` | Résultats réellement observés pour T01 à T12 |
 | `docs/matrice-tracabilite.md` | Règles et exigences → tâches → vérifications |
+| `docs/bilan-individuel.md` | Modèle du bilan individuel (à rédiger par chaque membre du binôme) |
 | `.specify/memory/constitution.md` | Principes du projet (version 1.0.0) |
 | `specs/001-reservation-materiel/spec.md` | Spécification fonctionnelle (5 histoires, 27 exigences) |
 | `specs/001-reservation-materiel/plan.md` | Plan technique et contrôle de constitution |

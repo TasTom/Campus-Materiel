@@ -57,8 +57,8 @@ serait une invention non demandée.
 - Maven Wrapper exclusivement (principe VI) ;
 - messages utilisateur en français.
 
-**Échelle et périmètre** : 3 étudiants fictifs, 5 équipements, 4 pages, 6 routes, 3 entités.
-Application mono-utilisateur.
+**Échelle et périmètre** : 3 étudiants fictifs, 5 équipements, 3 pages affichées, 7 routes HTTP
+(dont une redirection), 3 entités. Application mono-utilisateur.
 
 ## Contrôle de constitution
 
@@ -128,9 +128,10 @@ src/main/java/com/campus/campusmateriel/
 │   └── ReservationRepository.java
 ├── service/
 │   ├── ReservationService.java        # Règles RG-01 à RG-09
-│   └── EtudiantCourantService.java    # Lecture/écriture de l'étudiant en session
-└── session/
-    └── CleSession.java                # Constante de la clé de session
+│   ├── EtudiantCourantService.java    # Lecture/écriture de l'étudiant en session
+│   ├── MessagesRefusService.java      # Traduction des motifs de refus en français
+│   ├── MotifRefus.java                # Motifs de refus (enum)
+│   └── RegleMetierException.java      # Erreur métier portant un motif
 
 src/main/resources/
 ├── application.properties
@@ -138,14 +139,19 @@ src/main/resources/
 └── static/                            # Feuille de style
 
 src/test/java/com/campus/campusmateriel/
+├── support/                           # Horloge fixe (2030-03-10) et socle commun
 ├── service/                           # Tests des règles métier (RG-01 à RG-09)
 ├── controller/                        # Tests des routes, y compris requêtes forgées (T08)
-└── persistence/                       # Test de persistance (T09)
+└── persistence/                       # Test de persistance et de concurrence (T09, T12)
 ```
 
 **Décision de structure** : un seul projet Maven, une seule application Spring Boot. Il n'y a ni
 module `frontend` séparé (les vues sont rendues côté serveur) ni module `api` séparé (il n'y a
 pas de client distinct). La séparation se fait par paquet, conformément à la constitution.
+
+La constante de clé de session est déclarée dans `EtudiantCourantService`
+(`CLE_SESSION`) plutôt que dans un paquet `session` dédié : un paquet ne contenant qu'une seule
+constante n'apporterait aucune lisibilité supplémentaire (principe I).
 
 ## Suivi de la complexité
 

@@ -213,6 +213,10 @@ montrent l'utilité de la vérification automatisée.
   périmètre du TP (hypothèse H-03).
 - **L'état `ANNULEE_ADMINISTRATIVE` n'est jamais produit.** Il est défini dans le modèle sur
   décision CA-02 et son absence d'utilisation est garantie par un test (FR-027).
+- **Une méthode de repository n'est pas appelée.**
+  `ReservationRepository.countByEtudiantIdAndDateReservationAndStatut` est préparée pour la
+  limite de deux réservations par jour et n'est utilisée par aucune règle de cette version.
+  `data-model.md` signale explicitement qu'elle peut être supprimée sans gêner l'évolution.
 - **La limite de deux réservations actives par jour n'est pas implémentée.** Elle relève de
   l'étape d'évolution du TP.
 - **La vérification T09 reste manuelle.** Un test automatisé qui redémarrerait réellement

@@ -205,6 +205,62 @@ Le rôle du binôme est de contrôler la conformité au périmètre, pas seuleme
 
 ---
 
+## D-10 — Analyse de cohérence : trois écarts détectés puis corrigés
+
+**Date :** 16 septembre 2026
+**Contexte :** avant la livraison, une analyse de cohérence a été menée entre la spécification,
+le plan, les tâches et le code réellement écrit, conformément à l'étape `/speckit-analyze`.
+
+**Écarts détectés :**
+
+| # | Écart | Gravité | Correction |
+|---|---|---|---|
+| 1 | `spec.md` (SC-005) exigeait la couverture de « FR-001 à FR-024 », alors que la clarification CA-01 et CA-02 avait ajouté FR-025 à FR-027. Le critère de succès était donc en retard sur la spécification. | Moyenne | Plage corrigée en « FR-001 à FR-027 » |
+| 2 | `plan.md` annonçait « 6 routes », alors que le contrat et le code en comptent 7. | Faible | Corrigé en « 7 routes HTTP (dont une redirection) » |
+| 3 | La spécification indiquait que la décision CA-03 était « à tracer dans le journal », alors qu'elle l'était déjà (D-08). | Faible | Renvoi explicite vers D-08 |
+| 4 | Les tâches T001 à T039 étaient toutes cochées « à faire » alors qu'elles étaient réalisées et vérifiées. | Moyenne | Cases mises à jour |
+
+**Décision :** corriger les quatre écarts plutôt que de les contourner.
+
+**Leçon retenue :** les écarts 1 et 4 sont apparus **après** l'ajout de nouvelles exigences en
+cours de route. Une exigence ajoutée par une décision de clarification doit être reportée non
+seulement là où on la rédige, mais partout où un intervalle ou un décompte la mentionne. C'est
+le risque documentaire le plus fréquent dans ce projet : le texte se contredit avec lui-même
+lorsqu'un compte d'exigences reste figé à sa valeur initiale.
+
+**Portée du contrôle :** aucun écart n'a été trouvé sur le code lui-même. Les règles RG-01 à
+RG-09 et les exigences FR-001 à FR-027 sont toutes reliées à une tâche et à une vérification
+(voir `docs/matrice-tracabilite.md`).
+
+---
+
+## D-11 — Deux fichiers de code non atteignables ou non utilisés, assumés
+
+**Date :** 16 septembre 2026
+**Contexte :** l'analyse de cohérence a relevé deux cas de code qui n'est pas exercé par
+l'application en fonctionnement.
+
+**Cas concernés :**
+
+1. `StatutReservation.ANNULEE_ADMINISTRATIVE` : aucune fonctionnalité ne peut produire cet état
+   (décision CA-02).
+2. `ReservationRepository.countByEtudiantIdAndDateReservationAndStatut` : aucune règle de cette
+   version ne l'appelle ; elle est préparée pour la limite de deux réservations.
+
+**Décision :** conserver les deux, et le documenter.
+
+**Justification :** le principe VI de la constitution autorise un ajout hors périmètre sur
+décision explicite et consignée. Pour le premier cas, FR-027 transforme la limite en exigence
+vérifiable et un test garantit que l'application ne produit jamais cet état. Pour le second,
+le choix est assumé et réversible : `data-model.md` indique explicitement que la méthode peut
+être supprimée sans gêner l'étape d'évolution.
+
+**Conséquence :** ces deux éléments sont signalés dans la documentation pour qu'un relecteur ne
+les découvre pas avec surprise. Ils sont comptés comme des limites connues dans le compte rendu
+de recette.
+
+---
+
 ## Propositions de l'IA corrigées, refusées ou précisées
 
 | # | Proposition initiale | Décision du binôme | Motif |
@@ -216,5 +272,7 @@ Le rôle du binôme est de contrôler la conformité au périmètre, pas seuleme
 | 5 | Conserver le `.gitignore` généré tel quel | Précisée | Ajout de `data/` et de l'outillage Python ; sans quoi la base locale aurait été versionnée (D-05) |
 | 6 | Modèle de réservation à deux états `ACTIVE` / `ANNULEE` (solution de référence) | Précisée par décision du binôme | Le binôme veut distinguer l'origine de l'annulation, avec un troisième état non atteignable et borné par FR-027 (D-07) |
 | 7 | Intégrer dès maintenant la limite de deux réservations actives par jour | Refusée | Contredit le déroulé de l'énoncé, qui place cette règle à l'étape « évolution » (D-09) |
+| 8 | Annoncer « 6 routes » et « FR-001 à FR-024 » sans revérifier après les clarifications | Corrigée | L'analyse de cohérence a relevé deux décomptes restés figés avant l'ajout de FR-025 à FR-027 (D-10) |
+| 9 | Laisser les cases des tâches à « à faire » alors qu'elles étaient réalisées | Corrigée | Un suivi d'avancement faux est une incohérence documentaire : les cases ont été mises à jour (D-10) |
 
 *Ce tableau est complété au fil du projet.*

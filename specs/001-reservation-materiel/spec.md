@@ -301,7 +301,7 @@ mais au plus une seule active pour une date donnée (les réservations annulées
   enregistrées sont toujours présentes, avec leur état.
 - **SC-004** : 100 % des 12 scénarios de recette T01 à T12 de `docs/enonce.md` produisent le
   résultat attendu.
-- **SC-005** : 100 % des exigences FR-001 à FR-024 sont couvertes par au moins une vérification
+- **SC-005** : 100 % des exigences FR-001 à FR-027 sont couvertes par au moins une vérification
   et figurent dans la matrice de traçabilité.
 - **SC-006** : toute saisie invalide produit un message compréhensible en français, et le nombre
   d'enregistrements modifiés est nul.
@@ -339,7 +339,7 @@ dans `docs/journal-decisions.md`.
 |---|---|---|---|
 | CA-01 | Un étudiant re-réservant un matériel qu'il a lui-même déjà réservé doit-il recevoir un message distinct de l'indisponibilité générale ? | **Oui.** Le message précise que l'étudiant a déjà réservé ce matériel pour cette date. Le refus reste le même : aucune réservation n'est créée. | FR-025 ajoutée ; scénario 7 de l'histoire 3 précisé |
 | CA-02 | L'état d'une réservation doit-il distinguer l'origine d'une annulation ? | **Oui.** Trois états : active, annulée par l'étudiant, annulée par l'administration. Cette décision **étend** le modèle minimal de l'énoncé et s'écarte de la solution de référence, qui ne prévoit que deux états. | FR-026 et FR-027 ajoutées ; section « Entités clés » précisée |
-| CA-03 | La limite de deux réservations actives par étudiant et par jour doit-elle figurer dans cette version ? | **Non.** Elle reste hors périmètre et sera traitée comme une évolution, en commençant par la reformulation de RG-04. | Déjà présente dans les exclusions du périmètre ; à tracer dans le journal de décisions |
+| CA-03 | La limite de deux réservations actives par étudiant et par jour doit-elle figurer dans cette version ? | **Non.** Elle reste hors périmètre et sera traitée comme une évolution, en commençant par la reformulation de RG-04. | Déjà présente dans les exclusions du périmètre ; décision tracée au journal (`docs/journal-decisions.md`, D-08) |
 
 ### Réponses imposées par l'énoncé (rappel)
 
