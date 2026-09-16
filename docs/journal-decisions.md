@@ -124,6 +124,87 @@ avertissements à chaque `git add`.
 
 ---
 
+## D-06 — Message distinct en cas de re-réservation par le même étudiant
+
+**Date :** 16 septembre 2026
+**Contexte :** l'énoncé ne précise pas le message à afficher lorsqu'un étudiant demande un
+matériel qu'il a lui-même déjà réservé à la même date. Le refus est certain (RG-02) ; seul le
+message est ambigu.
+
+**Décision :** afficher un message distinct indiquant que l'étudiant a déjà réservé ce matériel
+pour cette date, plutôt que le message générique d'indisponibilité.
+
+**Justification :** l'étudiant comprend plus vite la situation et n'a pas à deviner s'il s'est
+trompé de matériel ou de date. Le coût est limité : une exigence (FR-025) et un test.
+
+**Conséquences :** FR-025 ajoutée à la spécification ; scénario 7 de l'histoire 3 précisé ; un
+test doit vérifier que les deux messages sont bien distincts.
+
+---
+
+## D-07 — L'état d'une réservation distingue l'origine de l'annulation
+
+**Date :** 16 septembre 2026
+**Contexte :** le modèle minimal de l'énoncé ne mentionne que « état ». La solution de référence
+proposée par l'assistant (`copilot.md`) définit exactement deux valeurs : `ACTIVE` et `ANNULEE`.
+Aucune règle de l'énoncé ne demande de distinguer l'origine d'une annulation.
+
+**Décision :** retenir **trois** états — active, annulée par l'étudiant, annulée par
+l'administration — et documenter explicitement que le troisième n'est atteignable par aucune
+fonctionnalité de cette version.
+
+**Justification :** décision explicite du binôme, qui souhaite que le modèle d'état n'ait pas à
+être modifié lorsqu'un traitement administratif sera ajouté. Le principe VI de la constitution
+autorise un ajout hors périmètre **à condition d'une décision explicite et consignée**, ce qui
+est le cas ici.
+
+**Conséquences et risque assumé :**
+
+- FR-026 et FR-027 ajoutées à la spécification.
+- L'état « annulée par l'administration » est **du code non atteignable**. Ce point est assumé
+  et borné : aucune route, aucun formulaire et aucun service d'annulation administrative ne sont
+  créés. FR-027 transforme cette limite en exigence vérifiable, qui sera couverte par un test
+  garantissant que l'application ne produit jamais cet état.
+- Cette décision **s'écarte de la solution de référence** de l'assistant. Elle est donc
+  journalisée comme proposition corrigée (voir tableau ci-dessous, entrée 6).
+
+---
+
+## D-08 — La limite de deux réservations actives par jour reste hors périmètre
+
+**Date :** 16 septembre 2026
+**Contexte :** l'énoncé réserve cette règle à l'étape « évolution », après la recette. Il serait
+tentant de l'implémenter immédiatement pour éviter une seconde passe.
+
+**Décision :** ne pas l'implémenter. La limite est confirmée hors périmètre et tracée
+explicitement comme telle.
+
+**Justification :** le déroulé pédagogique attendu est « évolution du besoin → modification de la
+spécification → répercussion sur le plan et les tâches → implémentation ». L'implémenter
+maintenant ferait disparaître l'exercice et priverait le binôme du test d'un point d'évaluation.
+De plus, l'énoncé exige de ne pas conserver deux formulations contradictoires de RG-04 : la
+reformulation doit être faite au moment de l'évolution.
+
+**Conséquences :** la limite figure dans les exclusions du périmètre de la spécification et dans
+ce journal. L'étape « évolution » commencera par la reformulation de RG-04.
+
+---
+
+## D-09 — Proposition de l'IA refusée : implémenter la limite des deux réservations
+
+**Date :** 16 septembre 2026
+**Contexte :** lors de la rédaction de la spécification, l'assistant a proposé d'intégrer
+directement la limite de deux réservations actives par étudiant et par jour, au motif qu'elle
+« simplifierait » la validation.
+
+**Décision :** refusée. La proposition contredit l'énoncé, qui place cette règle après la
+recette, et aurait fait disparaître l'étape « évolution » du TP.
+
+**Justification :** une proposition techniquement raisonnable peut être pédagogiquement fausse.
+Le rôle du binôme est de contrôler la conformité au périmètre, pas seulement la faisabilité.
+
+---
+
 ## Propositions de l'IA corrigées, refusées ou précisées
 
 | # | Proposition initiale | Décision du binôme | Motif |
@@ -133,5 +214,7 @@ avertissements à chaque `git add`.
 | 3 | Installer un Maven global et un JDK 25 supplémentaire | Refusée | Un JDK 25 est déjà présent et le Maven Wrapper suffit ; les consignes du projet imposent le Wrapper (D-03) |
 | 4 | Créer le projet dans un sous-dossier `campus-materiel/` | Corrigée | Le dossier courant contient déjà les documents ; un sous-dossier aurait dupliqué le dépôt (D-04) |
 | 5 | Conserver le `.gitignore` généré tel quel | Précisée | Ajout de `data/` et de l'outillage Python ; sans quoi la base locale aurait été versionnée (D-05) |
+| 6 | Modèle de réservation à deux états `ACTIVE` / `ANNULEE` (solution de référence) | Précisée par décision du binôme | Le binôme veut distinguer l'origine de l'annulation, avec un troisième état non atteignable et borné par FR-027 (D-07) |
+| 7 | Intégrer dès maintenant la limite de deux réservations actives par jour | Refusée | Contredit le déroulé de l'énoncé, qui place cette règle à l'étape « évolution » (D-09) |
 
 *Ce tableau est complété au fil du projet.*

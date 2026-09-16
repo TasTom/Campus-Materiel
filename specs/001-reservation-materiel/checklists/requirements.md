@@ -23,7 +23,7 @@ Elle ne remplace pas la recette.
 - [x] Les cas limites sont identifiés
 - [x] Le périmètre est clairement délimité
 - [x] Les dépendances et les hypothèses sont identifiées
-- [ ] Aucune ambiguïté restante — **3 questions restent ouvertes (A-01, A-02, A-03)**
+- [x] Aucune ambiguïté restante — les 3 questions A-01 à A-03 ont été tranchées (décisions CA-01 à CA-03)
 
 ## Maturité de la fonctionnalité
 
@@ -68,6 +68,16 @@ spécification). **Aucun scénario n'est orphelin.**
 
 **Aucune règle métier n'est sans exigence.**
 
+### Vérification du périmètre après clarification CA-02
+
+La décision CA-02 étend le modèle d'état de la réservation. Elle ne doit pas élargir le
+périmètre fonctionnel :
+
+- [x] Aucune route d'administration n'est ajoutée
+- [x] Aucun formulaire d'annulation administrative n'est ajouté
+- [x] L'exigence FR-027 borne l'usage de cet état à un rôle documentaire et testable
+- [x] La limite des deux réservations actives par jour reste hors périmètre (CA-03)
+
 ### Décisions imposées par l'énoncé (section 9)
 
 | Situation | Décision attendue | Traitement |
@@ -85,6 +95,9 @@ spécification). **Aucun scénario n'est orphelin.**
 - FR-024 est conservée dans la spécification car elle conditionne la **vérifiabilité** des
   autres exigences. La manière de l'obtenir (horloge injectable) est un choix technique qui
   appartient au plan.
-- Les trois ambiguïtés A-01 à A-03 sont volontairement laissées ouvertes. Aucune réponse n'a été
-  inventée : elles sont présentées au binôme comme questions de l'étape `/speckit-clarify`.
+- Les trois ambiguïtés A-01 à A-03 ont été présentées au binôme et tranchées : elles ne sont
+  plus des zones d'ombre, mais des décisions tracées (CA-01 à CA-03).
+- CA-02 étend volontairement le modèle d'état au-delà de la solution de référence. Le binôme en
+  assume la conséquence : un état supplémentaire à modéliser et à tester, sans fonctionnalité
+  associée. Cette décision est journalisée comme proposition corrigée de l'IA.
 - Les éléments non cochés doivent être traités avant la validation du Jalon 1.

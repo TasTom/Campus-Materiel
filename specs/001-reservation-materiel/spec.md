@@ -4,7 +4,10 @@
 
 **Créé le** : 2026-09-16
 
-**Statut** : Brouillon — en attente de validation (Jalon 1)
+**Statut** : Clarifiée — en attente de validation (Jalon 1)
+
+**Clarifications** : les ambiguïtés A-01 à A-03 ont été tranchées le 2026-09-16 (voir
+« Décisions de clarification » : CA-01, CA-02, CA-03).
 
 **Entrée** : description issue de `docs/enonce.md` — « Décris la fonctionnalité de réservation
 de matériel de Campus Matériel. Organise les besoins en histoires utilisateur priorisées.
@@ -123,8 +126,10 @@ réservation apparaît comme active ; réserver le même matériel à la même d
 6. **Étant donné** que la date courante est le 10 mars 2030, **quand** Alice réserve un matériel
    pour le 10 mars 2030, **alors** la réservation est acceptée (le jour même est autorisé).
 7. **Étant donné** qu'Alice a déjà une réservation active pour MAT-001 le 12 mars 2030, **quand**
-   Alice demande de nouveau MAT-001 pour le 12 mars 2030, **alors** la demande est refusée
-   comme toute autre double réservation, **et** aucune réservation supplémentaire n'est créée.
+   Alice demande de nouveau MAT-001 pour le 12 mars 2030, **alors** la demande est refusée,
+   **et** le message indique explicitement qu'Alice a déjà réservé ce matériel pour cette date
+   (message distinct de l'indisponibilité), **et** aucune réservation supplémentaire n'est
+   créée [décision CA-01].
 8. **Étant donné** un identifiant de matériel inexistant, **quand** une réservation est
    demandée, **alors** la demande est refusée avec un message explicite, **et** aucune
    réservation n'est créée.
@@ -193,9 +198,12 @@ devient « annulée » et que le matériel redevient disponible à cette date.
    **alors** la demande est refusée, la réservation reste inchangée **et ce refus vaut aussi
    lorsque la demande est adressée directement au serveur, sans passer par l'interface**.
 6. **Étant donné** qu'Alice possède une réservation déjà annulée, **quand** elle l'annule de
-   nouveau, **alors** aucune donnée n'est modifiée et un message lui indique que la réservation
-   est déjà annulée.
-7. **Étant donné** une réservation inexistante, **quand** une annulation est demandée, **alors**
+   nouveau, **alors** aucune donnée n'est modifiée (l'état d'annulation et son origine restent
+   inchangés) et un message lui indique que la réservation est déjà annulée.
+7. **Étant donné** qu'Alice annule une de ses réservations actives, **quand** elle consulte
+   ensuite la réservation, **alors** l'état indique qu'elle a été annulée par l'étudiant
+   [décision CA-02].
+8. **Étant donné** une réservation inexistante, **quand** une annulation est demandée, **alors**
    la demande est refusée avec un message explicite, sans modification des données.
 
 ---
@@ -249,6 +257,9 @@ Chaque exigence est vérifiable indépendamment. La colonne « Règle » indique
 | FR-022 | Le système DOIT afficher un message explicite, sans erreur technique, lorsqu'une liste ne contient aucun résultat. | RG-09 |
 | FR-023 | Le système DOIT distinguer chaque exemplaire physique de matériel par un identifiant distinct. | RG-01 |
 | FR-024 | La date courante utilisée par les règles métier DOIT pouvoir être fixée artificiellement afin que les vérifications soient reproductibles. | — |
+| FR-025 | Lorsqu'un étudiant demande un matériel qu'il a lui-même déjà réservé à la même date, le système DOIT refuser la demande avec un message qui distingue ce cas de l'indisponibilité générale. | RG-02 |
+| FR-026 | Le système DOIT conserver l'origine d'une annulation : annulation demandée par l'étudiant ou annulation administrative. | RG-07 |
+| FR-027 | L'application DOIT attribuer l'origine « annulation demandée par l'étudiant » à toute annulation qu'elle réalise, aucune interface d'administration n'existant dans ce périmètre. | RG-07 |
 
 ### Entités clés
 
@@ -258,8 +269,19 @@ Chaque exigence est vérifiable indépendamment. La colonne « Règle » indique
 | Matériel | Un exemplaire physique unique d'équipement | Identifiant, nom, catégorie |
 | Réservation | L'occupation d'un matériel par un étudiant à une date | Identifiant, étudiant, matériel, date, état |
 
-**État d'une réservation** : une réservation est soit « active », soit « annulée ». Aucun autre
-état n'est nécessaire au périmètre de cette version.
+**État d'une réservation** : une réservation active peut être annulée. Conformément à la
+décision de clarification CA-02, l'état **distingue l'origine** de l'annulation :
+
+| État | Signification | Atteignable dans cette version |
+|---|---|---|
+| active | La réservation est en cours ; elle rend le matériel indisponible à sa date | Oui |
+| annulée par l'étudiant | L'étudiant propriétaire a annulé la réservation | Oui |
+| annulée par l'administration | Annulation décidée hors application | **Non** — aucune interface d'administration n'est au périmètre (FR-027) |
+
+Les états « annulée » libèrent l'équipement à la date concernée (RG-07) et ne comptent pas dans
+la recherche d'un conflit de réservation (RG-02). L'état « annulée par l'administration » n'est
+produit par aucune fonctionnalité de cette version : il est défini pour que le modèle d'état
+soit complet sans nécessiter de modification lorsqu'un tel traitement sera ajouté.
 
 **Relations** : une réservation concerne exactement un étudiant et exactement un matériel. Un
 étudiant peut avoir plusieurs réservations ; un matériel peut avoir plusieurs réservations,
@@ -307,16 +329,33 @@ mais au plus une seule active pour une date donnée (les réservations annulées
 - **H-07** : le matériel et les étudiants ne sont pas modifiables par l'application (pas
   d'interface d'administration), conformément au périmètre exclu.
 
-## Ambiguïtés restant à clarifier
+## Décisions de clarification
 
-Les points suivants ne sont pas tranchés par l'énoncé et nécessitent une décision explicite.
-Ils ne doivent **pas** être résolus silencieusement.
+Les ambiguïtés de la première version ont été examinées et tranchées explicitement avec le
+binôme. Aucune réponse n'a été inventée : chaque décision est consignée ci-dessous et reportée
+dans `docs/journal-decisions.md`.
 
-| Référence | Question | Impact |
+| Référence | Question examinée | Décision retenue | Conséquence sur la spécification |
+|---|---|---|---|
+| CA-01 | Un étudiant re-réservant un matériel qu'il a lui-même déjà réservé doit-il recevoir un message distinct de l'indisponibilité générale ? | **Oui.** Le message précise que l'étudiant a déjà réservé ce matériel pour cette date. Le refus reste le même : aucune réservation n'est créée. | FR-025 ajoutée ; scénario 7 de l'histoire 3 précisé |
+| CA-02 | L'état d'une réservation doit-il distinguer l'origine d'une annulation ? | **Oui.** Trois états : active, annulée par l'étudiant, annulée par l'administration. Cette décision **étend** le modèle minimal de l'énoncé et s'écarte de la solution de référence, qui ne prévoit que deux états. | FR-026 et FR-027 ajoutées ; section « Entités clés » précisée |
+| CA-03 | La limite de deux réservations actives par étudiant et par jour doit-elle figurer dans cette version ? | **Non.** Elle reste hors périmètre et sera traitée comme une évolution, en commençant par la reformulation de RG-04. | Déjà présente dans les exclusions du périmètre ; à tracer dans le journal de décisions |
+
+### Réponses imposées par l'énoncé (rappel)
+
+| Situation | Décision | Traitement |
 |---|---|---|
-| A-01 | Alice tente de réserver MAT-001 le 12 mars alors qu'elle possède déjà cette réservation : le message doit-il distinguer « vous avez déjà réservé » de « matériel indisponible » ? | Message affiché à l'utilisateur (FR-006) |
-| A-02 | L'état d'une réservation doit-il distinguer « annulée par l'étudiant » d'une éventuelle annulation administrative ? | Modèle de données, historique |
-| A-03 | La limite de deux réservations actives par étudiant et par jour, évoquée comme évolution future, doit-elle déjà apparaître comme non-objectif explicite dans cette version ? | Périmètre (la limite n'est pas dans cette version) |
+| Annulation d'une réservation déjà annulée | Aucune modification ; message indiquant son état | CL-01, FR-013, FR-016 |
+| Réservation d'un matériel inconnu | Refus ; aucune création | CL-02, FR-018 |
+| Date absente ou mal formée | Refus avec explication | CL-03, FR-019 |
+| Annulation d'une réservation passée | Refus | CL-04, FR-012 |
+| Liste sans résultat | Message explicite, sans erreur technique | CL-05, FR-022 |
+
+**Point de vigilance CA-02** : l'état « annulée par l'administration » n'est produit par aucune
+fonctionnalité de cette version. Il ne doit donc donner lieu à **aucun code de traitement
+d'annulation administrative**, ni à une route, ni à un formulaire. FR-027 garantit que
+l'application n'attribue jamais cet état, et cette garantie doit être vérifiée par un test.
+L'ajouter au modèle d'état ne justifie aucune fonctionnalité supplémentaire.
 
 ## Exclusions du périmètre
 
@@ -347,5 +386,5 @@ d'une mise à jour préalable de la spécification, du plan et des tâches.
 | T08 | 5 | FR-010 |
 | T09 | 3, 5 | FR-015 |
 | T10 | 3 | FR-019, FR-016 |
-| T11 | 5 | FR-013, FR-016 |
+| T11 | 5 | FR-013, FR-016, FR-026 |
 | T12 | 3 | FR-021 |
