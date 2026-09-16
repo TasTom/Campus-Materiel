@@ -21,6 +21,7 @@ pas sur la formulation, afin qu'une reformulation ne casse pas les tests.
 |---|---|---|---|
 | `DATE_INVALIDE` | « La date saisie est invalide. Utilisez le format année-mois-jour. » | Aucune | FR-016, FR-019 |
 | `ETUDIANT_NON_SELECTIONNE` | « Veuillez d'abord choisir un étudiant. » | Aucune | FR-017 |
+| `ETUDIANT_INCONNU` | « Cet étudiant n'existe pas. » | Aucune | FR-001, FR-016 |
 | `MATERIEL_INCONNU` | « Ce matériel n'existe pas. » | Aucune | FR-018 |
 | `DATE_PASSEE` | « La date choisie est déjà passée. Choisissez aujourd'hui ou une date future. » | Aucune | FR-007, FR-016 |
 | `MATERIEL_INDISPONIBLE` | « Ce matériel est déjà réservé à cette date. » | Aucune | FR-006, FR-021 |
@@ -69,6 +70,10 @@ Aucun de ces messages ne doit s'accompagner d'une erreur technique (CL-05, FR-02
 Le libellé « Réservé » est volontairement neutre : il **n'indique pas qui** a réservé le
 matériel. Afficher le nom d'un autre étudiant ne serait demandé par aucune règle de l'énoncé et
 exposerait une information sur une personne à un utilisateur qui n'est pas authentifié.
+
+Ces deux libellés sont produits par le modèle de vue `MaterielDisponibilite` et **non** dans le
+gabarit : le texte affiché ne doit exister qu'à un seul endroit du code, faute de quoi une
+reformulation en oublierait un exemplaire.
 
 ---
 

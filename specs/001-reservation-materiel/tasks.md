@@ -5,9 +5,9 @@ description: "Liste des tâches pour la réservation de matériel pédagogique"
 
 # Tâches : Réservation de matériel pédagogique
 
-**État au 16 septembre 2026** : T001 à T040 terminées et vérifiées. T041 (`/speckit-converge`)
-reste à lancer. T042 à T045 concernent l'évolution du besoin et ne doivent être entamées
-qu'après la validation de la recette (section 14 de l'énoncé).
+**État au 16 septembre 2026** : T001 à T041 terminées et vérifiées (68 tests, aucun échec).
+T042 à T045 concernent l'évolution du besoin et ne doivent être entamées qu'après la validation
+de la recette (section 14 de l'énoncé).
 
 **Entrée** : documents de conception de `specs/001-reservation-materiel/`
 
@@ -360,7 +360,7 @@ est vérifiée, et la limitation assumée de CA-02 est prouvée.
   - **Vérification** : rapport d'analyse sans incohérence bloquante
   - **Exigences** : Jalon 2 · section 11 de l'énoncé
 
-- [ ] **T041** Lancer `/speckit-converge` pour rechercher les écarts restants entre le code et la spécification, puis traiter les tâches ajoutées
+- [x] **T041** Lancer `/speckit-converge` pour rechercher les écarts restants entre le code et la spécification, puis traiter les tâches ajoutées
   - **Résultat** : les écarts résiduels sont identifiés et traités
   - **Dépend de** : T040
   - **Vérification** : rapport de convergence

@@ -261,6 +261,42 @@ de recette.
 
 ---
 
+## D-12 — Convergence : quatre écarts entre le contrat et le code
+
+**Date :** 16 septembre 2026
+**Contexte :** après la recette, une comparaison systématique a été menée entre le code
+réellement écrit et les documents de conception (étape `/speckit-converge`).
+
+**Écarts détectés :**
+
+| # | Écart | Nature | Correction |
+|---|---|---|---|
+| 1 | `ReservationRepository.findByDateReservationAndStatut` était déclarée, documentée comme utile à FR-004, et **jamais appelée** | Code mort + affirmation fausse dans `data-model.md` | Méthode supprimée ; le tableau des requêtes du modèle de données corrigé |
+| 2 | `MaterielDisponibilite.getLibelleDisponibilite()` était déclarée et jamais appelée : les libellés « Disponible » et « Réservé » étaient **écrits en dur dans le gabarit**, alors que le contrat des messages les définit | Duplication d'un texte du contrat en deux endroits | Le gabarit affiche désormais la valeur du modèle ; une reformulation ne peut plus en oublier un exemplaire |
+| 3 | `MessagesRefusService.listeMaterielsVide()` était déclarée et jamais appelée : la phrase « Aucun matériel n'est enregistré » était **écrite en dur dans le gabarit** | Même duplication que le cas 2 | Le contrôleur place le message dans le modèle ; le gabarit l'affiche |
+| 4 | `MotifRefus.ETUDIANT_INCONNU` et son message existaient dans le code mais **absents du contrat des messages** | Contrat incomplet | Ligne ajoutée à `contracts/messages.md` |
+
+**Décision :** corriger les quatre écarts dans le code et les documents, plutôt que de mettre à
+jour la documentation pour qu'elle décrive ce que le code fait.
+
+**Justification :** dans les quatre cas, c'est le **contrat** qui décrit l'intention, et le code
+qui s'en écartait. Aligner la documentation sur le code aurait fait perdre l'intention et
+affaibli la portée du contrat.
+
+**Leçon retenue :** les écarts 2 et 3 portent sur des **textes affichés définis à deux endroits**.
+Un texte dupliqué est un texte qui divergera : un des deux exemplaires sera modifié et pas
+l'autre. La règle appliquée est désormais : un texte affiché n'existe qu'à un seul endroit du
+code.
+
+**Écart de méthode relevé au passage :** le test écrit pour couvrir FR-022 (liste de matériel
+vide) a d'abord **fait échouer 37 autres tests**, parce qu'il vidait la table du matériel sans la
+restaurer — tous les tests partagent la même base en mémoire, et l'initialiseur ne s'exécute
+qu'au démarrage du contexte. Le test a été corrigé par une restauration explicite dans un bloc
+`finally`. Ce défaut n'a été visible que parce que la suite complète a été relancée après l'ajout
+du test ; il serait passé inaperçu si le test avait été vérifié isolément.
+
+---
+
 ## Propositions de l'IA corrigées, refusées ou précisées
 
 | # | Proposition initiale | Décision du binôme | Motif |
@@ -274,5 +310,7 @@ de recette.
 | 7 | Intégrer dès maintenant la limite de deux réservations actives par jour | Refusée | Contredit le déroulé de l'énoncé, qui place cette règle à l'étape « évolution » (D-09) |
 | 8 | Annoncer « 6 routes » et « FR-001 à FR-024 » sans revérifier après les clarifications | Corrigée | L'analyse de cohérence a relevé deux décomptes restés figés avant l'ajout de FR-025 à FR-027 (D-10) |
 | 9 | Laisser les cases des tâches à « à faire » alors qu'elles étaient réalisées | Corrigée | Un suivi d'avancement faux est une incohérence documentaire : les cases ont été mises à jour (D-10) |
+| 10 | Affirmer dans le modèle de données qu'une méthode servait à FR-004 alors qu'elle n'était jamais appelée | Corrigée | Méthode supprimée et document corrigé (D-12) |
+| 11 | Écrire les libellés « Disponible » / « Réservé » et le message de liste vide en dur dans le gabarit | Corrigée | Les textes proviennent du modèle, un seul exemplaire par texte (D-12) |
 
 *Ce tableau est complété au fil du projet.*

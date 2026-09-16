@@ -1,14 +1,18 @@
 package com.campus.campusmateriel.controller;
 
+import com.campus.campusmateriel.config.DonneesDemoInitialiseur;
 import com.campus.campusmateriel.domain.Reservation;
 import com.campus.campusmateriel.support.ConfigurationHorlogeTest;
 import com.campus.campusmateriel.support.TestIntegrationSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.mock.web.MockHttpSession;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -21,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @DisplayName("Route de consultation de mes réservations")
 class ReservationListeTest extends TestIntegrationSupport {
+
+    @Autowired
+    private DonneesDemoInitialiseur initialiseur;
 
     @Test
     @DisplayName("FR-009 : chaque étudiant ne voit que ses propres réservations")
@@ -65,6 +72,32 @@ class ReservationListeTest extends TestIntegrationSupport {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("messageInfo"))
                 .andExpect(content().string(containsString("aucune réservation")));
+    }
+
+    @Test
+    @DisplayName("FR-022 (CL-05) : aucun matériel enregistré produit un message explicite")
+    void aucunMaterielProduitUnMessage() throws Exception {
+        // Le jeu de donnees fictif contient toujours cinq materiaux : pour atteindre le cas
+        // « liste sans resultat » exige par FR-022, il faut vider la table. Sans ce test, le
+        // message ne serait jamais exerce et l'exigence ne serait pas verifiee.
+        //
+        // La table est restauree dans le bloc finally : tous les tests partagent la meme base
+        // en memoire, et l'initialiseur ne s'execute qu'au demarrage du contexte Spring.
+        // Sans cette restauration, les tests suivants echouent en cascade.
+        reservationRepository.deleteAll();
+        materielRepository.deleteAll();
+        try {
+            // L'assertion porte sur un fragment sans apostrophe : Thymeleaf echappe les
+            // apostrophes en HTML (&#39;), une comparaison sur le texte complet echouerait
+            // pour une raison sans rapport avec l'exigence verifiee.
+            mockMvc.perform(get("/materiels"))
+                    .andExpect(status().isOk())
+                    .andExpect(model().attributeExists("messageInfo"))
+                    .andExpect(content().string(containsString("Aucun matériel")))
+                    .andExpect(content().string(not(containsString("Exception"))));
+        } finally {
+            initialiseur.run(mock(ApplicationArguments.class));
+        }
     }
 
     @Test

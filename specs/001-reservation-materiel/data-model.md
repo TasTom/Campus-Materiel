@@ -230,7 +230,7 @@ de la réservation d'autrui.
 | Vérifier l'existence d'un conflit actif | `existsByMaterielIdAndDateReservationAndStatut(Long, LocalDate, StatutReservation)` | FR-004, FR-021 |
 | Retrouver la réservation active d'un étudiant | `findByMaterielIdAndDateReservationAndStatutAndEtudiantId(...)` | FR-025 |
 | Lister les réservations d'un étudiant | `findByEtudiantIdOrderByDateReservationDesc(Long)` | FR-009 |
-| Lister les réservations actives d'une date | `findByDateReservationAndStatut(LocalDate, StatutReservation)` | FR-004 |
+| Compter les réservations actives d'un couple (matériel, date) | `countByMaterielIdAndDateReservationAndStatut(...)` | vérification de T02 et T12 |
 | Compter les réservations actives d'un étudiant à une date | `countByEtudiantIdAndDateReservationAndStatut(...)` | réservé à l'évolution (RG-04) |
 
 La méthode de comptage est **préparée mais non utilisée** dans cette version : elle sert à

@@ -68,7 +68,11 @@ public class MaterielController {
 
         modele.addAttribute("dateConsultee", dateConsultee);
         modele.addAttribute("aujourdHui", reservationService.aujourdHui());
-        modele.addAttribute("disponibilites", reservationService.disponibilites(dateConsultee));
+        var disponibilites = reservationService.disponibilites(dateConsultee);
+        modele.addAttribute("disponibilites", disponibilites);
+        if (disponibilites.isEmpty()) {
+            modele.addAttribute("messageInfo", messagesRefusService.listeMaterielsVide());
+        }
         modele.addAttribute("etudiantCourant",
                 etudiantCourantService.etudiantCourant(session).orElse(null));
         return "materiels/liste";

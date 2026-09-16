@@ -62,8 +62,12 @@
                 <td th:text="${ligne.materiel.nom}">…</td>
                 <td th:text="${ligne.materiel.categorie}">…</td>
                 <td>
-                    <span th:if="${ligne.disponible}" class="etat-disponible">Disponible</span>
-                    <span th:unless="${ligne.disponible}" class="etat-indisponible">Réservé</span>
+                    <!-- Le libelle vient du modele et non du gabarit : le contrat des
+                         messages reste la seule source de verite des textes affiches. -->
+                    <span class="etat-disponible" th:if="${ligne.disponible}"
+                          th:text="${ligne.libelleDisponibilite}">Disponible</span>
+                    <span class="etat-indisponible" th:unless="${ligne.disponible}"
+                          th:text="${ligne.libelleDisponibilite}">Réservé</span>
                 </td>
                 <td>
                     <form th:if="${ligne.disponible}"
@@ -83,10 +87,8 @@
             </tbody>
         </table>
 
-        <p th:if="${disponibilites != null && disponibilites.isEmpty()}"
-           class="message message-info">
-            Aucun matériel n'est enregistré.
-        </p>
+        <div class="message message-info" th:if="${messageInfo}"
+             th:text="${messageInfo}"></div>
     </section>
 
 </main>

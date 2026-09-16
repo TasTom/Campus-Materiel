@@ -107,7 +107,8 @@ Ces éléments peuvent servir de preuves, mais ne remplacent pas votre analyse.
 | La décision a été prise explicitement, pas silencieusement | `docs/journal-decisions.md` D-01 |
 | L'identifiant `4.1.1.RELEASE` renvoyé par start.spring.io n'existait pas dans Maven Central | Journal D-02 |
 | Sept propositions de l'IA ont été corrigées, refusées ou précisées | `docs/journal-decisions.md`, dernier tableau |
-| 67 tests automatisés, dont un test par requête HTTP directe pour T08 | `docs/compte-rendu-recette.md` §1 et §2 |
+| 68 tests automatisés, dont un test par requête HTTP directe pour T08 | `docs/compte-rendu-recette.md` §1 et §2 |
+| Six anomalies ont été détectées par exécution, aucune ne reste ouverte | `docs/compte-rendu-recette.md` §4 |
 | Quatre anomalies ont été détectées par les tests, aucune ne reste ouverte | `docs/compte-rendu-recette.md` §4 |
 | La protection contre les doublons repose sur deux niveaux, et la contrainte de base est prouvée par un test | `research.md` R-01 et `ConflitConcurrentTest` |
 | Une décision du binôme a introduit du code non atteignable, assumé et borné | Décision CA-02 et test `jamaisAnnuleeAdministrative` |

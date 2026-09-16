@@ -15,11 +15,11 @@ réussi sur la seule affirmation d'un outil ou d'un assistant.
 Commande exécutée : `.\mvnw.cmd test`
 
 ```
-[INFO] Tests run: 67, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 68, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 
-**Statut : conforme.** 67 tests, aucun échec.
+**Statut : conforme.** 68 tests, aucun échec.
 
 | Classe de test | Tests | Statut |
 |---|---:|---|
@@ -29,7 +29,7 @@ Commande exécutée : `.\mvnw.cmd test`
 | `ReservationServiceAnnulationTest` | 10 | Conforme |
 | `EtudiantControllerTest` | 5 | Conforme |
 | `ReservationCreationTest` | 9 | Conforme |
-| `ReservationListeTest` | 8 | Conforme |
+| `ReservationListeTest` | 9 | Conforme |
 | `AnnulationNonProprietaireTest` | 6 | Conforme |
 | `ConflitConcurrentTest` | 5 | Conforme |
 | `DonneesDemoTest` | 4 | Conforme |
@@ -186,6 +186,8 @@ montrent l'utilité de la vérification automatisée.
 | A-2 | `LazyInitializationException` sur `reservation.materiel` lors du rendu de la liste | `ReservationListeTest` | Ajout d'un `@EntityGraph` sur la requête, `open-in-view` restant désactivé | Corrigée |
 | A-3 | Erreur d'évaluation lorsque la liste des disponibilités est absente du modèle | `ReservationListeTest` | Vérification de nullité ajoutée dans le gabarit | Corrigée |
 | A-4 | Le paquet `AutoConfigureMockMvc` a changé en Spring Boot 4 | Compilation des tests | Import corrigé vers `org.springframework.boot.webmvc.test.autoconfigure` | Corrigée |
+| A-5 | Un test qui vidait la table du matériel a fait échouer **37 autres tests** en cascade : le jeu de données fictif n'est inséré qu'au démarrage du contexte Spring, et tous les tests partagent la même base en mémoire | Exécution complète de la suite | Restauration du jeu de données dans un bloc `finally`, avec un commentaire expliquant le partage d'état | Corrigée |
+| A-6 | L'assertion sur le message de liste vide échouait alors que le message s'affichait : Thymeleaf échappe les apostrophes en HTML (`&#39;`) | Exécution du test A-5 | Assertion portée sur un fragment sans apostrophe | Corrigée |
 
 **Anomalies non corrigées restantes : aucune.**
 
@@ -226,9 +228,14 @@ montrent l'utilité de la vérification automatisée.
 
 ## 7. Conclusion
 
-**Recette : conforme.** Les 12 scénarios produisent le résultat attendu, les 67 tests automatisés
+**Recette : conforme.** Les 12 scénarios produisent le résultat attendu, les 68 tests automatisés
 passent, les 7 critères de succès sont atteints, et aucune anomalie ne reste ouverte.
 
-Les quatre anomalies rencontrées ont toutes été détectées par les tests avant la recette, ce qui
-confirme l'intérêt du principe IV de la constitution (« chaque règle métier possède une
-vérification exécutable »).
+Les six anomalies rencontrées ont toutes été détectées **par l'exécution** : quatre par les tests
+avant la recette, deux pendant l'ajout d'un test de complétude. Aucune n'a été repérée par
+relecture seule, ce qui confirme l'intérêt du principe IV de la constitution (« chaque règle
+métier possède une vérification exécutable »).
+
+L'anomalie A-5 mérite d'être retenue : un test **correct** dans son intention peut casser la
+suite entière s'il modifie un état partagé. C'est un argument de plus contre la relecture
+comme unique moyen de vérification.

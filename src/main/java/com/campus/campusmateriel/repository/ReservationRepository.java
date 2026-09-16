@@ -43,9 +43,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"materiel", "etudiant"})
     List<Reservation> findByEtudiantIdOrderByDateReservationDesc(Long etudiantId);
 
-    /** Liste les reservations d'un statut donne pour une date (FR-004). */
-    List<Reservation> findByDateReservationAndStatut(LocalDate dateReservation, StatutReservation statut);
-
     /**
      * Compte les reservations d'un statut donne pour un couple (materiel, date).
      *
