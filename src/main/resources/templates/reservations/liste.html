@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: entete('Mes réservations')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: enTete}"></header>
+<nav th:replace="~{fragments/layout :: navigation}"></nav>
+
+<main>
+
+    <div class="message message-succes" role="status"
+         th:if="${messageSucces}" th:text="${messageSucces}"></div>
+    <div class="message message-erreur" role="alert"
+         th:if="${messageErreur}" th:text="${messageErreur}"></div>
+    <div class="message message-info"
+         th:if="${messageInfo}" th:text="${messageInfo}"></div>
+
+    <section>
+        <h2>Mes réservations</h2>
+
+        <p th:if="${etudiantCourant != null}">
+            Réservations de
+            <span class="etudiant-courant" th:text="${etudiantCourant.nom}">…</span>.
+            Les réservations annulées restent affichées : l'historique est conservé.
+        </p>
+
+        <table th:if="${reservations != null && !reservations.isEmpty()}">
+            <caption>Réservations de l'étudiant courant</caption>
+            <thead>
+            <tr>
+                <th scope="col">Matériel</th>
+                <th scope="col">Catégorie</th>
+                <th scope="col">Date réservée</th>
+                <th scope="col">État</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="reservation : ${reservations}">
+                <td>
+                    <span th:text="${reservation.materiel.code}">MAT-000</span>
+                    —
+                    <span th:text="${reservation.materiel.nom}">…</span>
+                </td>
+                <td th:text="${reservation.materiel.categorie}">…</td>
+                <td th:text="${#temporals.format(reservation.dateReservation, 'd MMMM yyyy')}">…</td>
+                <td>
+                    <span th:if="${reservation.statut.name() == 'ACTIVE'}"
+                          class="etat-active">Active</span>
+                    <span th:unless="${reservation.statut.name() == 'ACTIVE'}"
+                          class="etat-annulee">Annulée</span>
+                </td>
+                <td>
+                    <!--
+                      Le bouton n'est proposé que lorsque l'annulation est possible.
+                      Ce masquage est un confort d'affichage : il ne remplace pas le
+                      controle serveur, qui est refait a chaque requete (scenario T08).
+                    -->
+                    <form th:if="${annulationPossible.get(reservation.id)}"
+                          th:action="@{/reservations/{id}/annulation(id=${reservation.id})}"
+                          method="post">
+                        <button type="submit" class="secondaire"
+                                th:attr="aria-label='Annuler la réservation de ' + ${reservation.materiel.code}">
+                            Annuler
+                        </button>
+                    </form>
+                    <span th:unless="${annulationPossible.get(reservation.id)}">—</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: pied}"></footer>
+
+</body>
+</html>

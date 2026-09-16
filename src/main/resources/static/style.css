@@ -1,0 +1,231 @@
+/* Feuille de style unique de l'application.
+   Objectif : lisibilité et utilisation au clavier, pas d'effet décoratif. */
+
+:root {
+    --couleur-texte: #1f2933;
+    --couleur-fond: #f5f7fa;
+    --couleur-carte: #ffffff;
+    --couleur-primaire: #1f4e79;
+    --couleur-primaire-clair: #2f6ea8;
+    --couleur-succes-fond: #e3f4e8;
+    --couleur-succes-bord: #2f7d4f;
+    --couleur-erreur-fond: #fdecea;
+    --couleur-erreur-bord: #b3261e;
+    --couleur-info-fond: #eaf1f8;
+    --couleur-info-bord: #1f4e79;
+    --couleur-bordure: #cbd2d9;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    color: var(--couleur-texte);
+    background-color: var(--couleur-fond);
+    line-height: 1.5;
+}
+
+.bandeau {
+    background-color: var(--couleur-primaire);
+    color: #ffffff;
+    padding: 1.2rem 1.5rem;
+}
+
+.bandeau h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.sous-titre {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.navigation {
+    background-color: var(--couleur-primaire-clair);
+}
+
+.navigation ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.navigation a {
+    display: block;
+    padding: 0.7rem 1.1rem;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.navigation a:hover {
+    background-color: var(--couleur-primaire);
+}
+
+/* Un contour visible garantit l'utilisation au clavier. */
+.navigation a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+    outline: 3px solid #ffb703;
+    outline-offset: 2px;
+}
+
+main {
+    max-width: 60rem;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+}
+
+section {
+    background-color: var(--couleur-carte);
+    border: 1px solid var(--couleur-bordure);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.2rem;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--couleur-primaire);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+caption {
+    text-align: left;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--couleur-bordure);
+}
+
+thead th {
+    background-color: var(--couleur-info-fond);
+}
+
+tbody tr:hover {
+    background-color: #f0f4f8;
+}
+
+.etat-disponible {
+    color: var(--couleur-succes-bord);
+    font-weight: 600;
+}
+
+.etat-indisponible {
+    color: var(--couleur-erreur-bord);
+    font-weight: 600;
+}
+
+.etat-active {
+    color: var(--couleur-succes-bord);
+    font-weight: 600;
+}
+
+.etat-annulee {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.message {
+    padding: 0.7rem 0.9rem;
+    border-radius: 4px;
+    border-left: 5px solid;
+    margin-bottom: 1rem;
+}
+
+.message-succes {
+    background-color: var(--couleur-succes-fond);
+    border-color: var(--couleur-succes-bord);
+}
+
+.message-erreur {
+    background-color: var(--couleur-erreur-fond);
+    border-color: var(--couleur-erreur-bord);
+}
+
+.message-info {
+    background-color: var(--couleur-info-fond);
+    border-color: var(--couleur-info-bord);
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: flex-end;
+}
+
+.champ {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.champ label {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+input, select {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--couleur-bordure);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+button {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--couleur-primaire);
+    border-radius: 4px;
+    background-color: var(--couleur-primaire);
+    color: #ffffff;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--couleur-primaire-clair);
+}
+
+button.secondaire {
+    background-color: #ffffff;
+    color: var(--couleur-primaire);
+}
+
+button.secondaire:hover {
+    background-color: var(--couleur-info-fond);
+}
+
+.pied {
+    max-width: 60rem;
+    margin: 2rem auto 1rem;
+    padding: 0 1rem;
+    font-size: 0.85rem;
+    color: #52606d;
+}
+
+.etudiant-courant {
+    font-weight: 600;
+    color: var(--couleur-primaire);
+}

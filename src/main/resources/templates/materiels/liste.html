@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: entete('Matériel disponible')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: enTete}"></header>
+<nav th:replace="~{fragments/layout :: navigation}"></nav>
+
+<main>
+
+    <div class="message message-succes" role="status"
+         th:if="${messageSucces}" th:text="${messageSucces}"></div>
+    <div class="message message-erreur" role="alert"
+         th:if="${messageErreur}" th:text="${messageErreur}"></div>
+
+    <section>
+        <h2>Étudiant courant</h2>
+        <p th:if="${etudiantCourant != null}">
+            Vous agissez au nom de
+            <span class="etudiant-courant" th:text="${etudiantCourant.nom}">…</span>.
+        </p>
+        <p th:if="${etudiantCourant == null}" class="message message-info">
+            Aucun étudiant n'est sélectionné :
+            <a th:href="@{/etudiants/selection}">choisissez un étudiant</a>
+            pour pouvoir réserver.
+        </p>
+    </section>
+
+    <section>
+        <h2>Disponibilités</h2>
+
+        <form th:action="@{/materiels}" method="get">
+            <div class="champ">
+                <label for="date">Date consultée</label>
+                <input type="date" id="date" name="date"
+                       th:value="${dateConsultee}" required>
+            </div>
+            <button type="submit">Afficher cette date</button>
+        </form>
+
+        <p th:if="${dateConsultee != null}">
+            Disponibilités pour le
+            <strong th:text="${#temporals.format(dateConsultee, 'd MMMM yyyy')}">…</strong>
+            (date du jour :
+            <span th:text="${#temporals.format(aujourdHui, 'd MMMM yyyy')}">…</span>).
+        </p>
+
+        <table th:if="${disponibilites != null && !disponibilites.isEmpty()}">
+            <caption>Matériel pédagogique</caption>
+            <thead>
+            <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Équipement</th>
+                <th scope="col">Catégorie</th>
+                <th scope="col">Disponibilité</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ligne : ${disponibilites}">
+                <td th:text="${ligne.materiel.code}">MAT-000</td>
+                <td th:text="${ligne.materiel.nom}">…</td>
+                <td th:text="${ligne.materiel.categorie}">…</td>
+                <td>
+                    <span th:if="${ligne.disponible}" class="etat-disponible">Disponible</span>
+                    <span th:unless="${ligne.disponible}" class="etat-indisponible">Réservé</span>
+                </td>
+                <td>
+                    <form th:if="${ligne.disponible}"
+                          th:action="@{/reservations}" method="post">
+                        <input type="hidden" name="materielId"
+                               th:value="${ligne.materiel.id}">
+                        <input type="hidden" name="dateReservation"
+                               th:value="${dateConsultee}">
+                        <button type="submit"
+                                th:attr="aria-label='Réserver ' + ${ligne.materiel.code}">
+                            Réserver
+                        </button>
+                    </form>
+                    <span th:unless="${ligne.disponible}">—</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${disponibilites != null && disponibilites.isEmpty()}"
+           class="message message-info">
+            Aucun matériel n'est enregistré.
+        </p>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: pied}"></footer>
+
+</body>
+</html>

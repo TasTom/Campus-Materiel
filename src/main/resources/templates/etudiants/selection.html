@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Le titre transmis au fragment ne contient volontairement pas d'apostrophe :
+  une apostrophe dans un litteral de fragment Thymeleaf entrerait en conflit avec
+  les guillemets qui delimitent l'attribut HTML.
+-->
+<head th:replace="~{fragments/layout :: entete('Étudiant courant')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: enTete}"></header>
+<nav th:replace="~{fragments/layout :: navigation}"></nav>
+
+<main>
+    <section>
+        <h2>Qui êtes-vous ?</h2>
+
+        <p>
+            Cette liste simule une identité pour les besoins du TP.
+            <strong>Ce n'est pas une authentification</strong> : n'importe qui peut changer
+            d'étudiant, et cette application ne doit pas être utilisée avec des données réelles.
+        </p>
+
+        <div class="message message-erreur" role="alert"
+             th:if="${messageErreur}" th:text="${messageErreur}"></div>
+
+        <p th:if="${etudiantCourantId == null}" class="message message-info">
+            Aucun étudiant n'est sélectionné pour le moment.
+        </p>
+
+        <form th:action="@{/etudiants/selection}" method="post">
+            <div class="champ">
+                <label for="etudiantId">Étudiant courant</label>
+                <select id="etudiantId" name="etudiantId" required>
+                    <option value="">— Choisir un étudiant —</option>
+                    <option th:each="etudiant : ${etudiants}"
+                            th:value="${etudiant.id}"
+                            th:text="${etudiant.nom}"
+                            th:selected="${etudiant.id == etudiantCourantId}">
+                    </option>
+                </select>
+            </div>
+            <button type="submit">Valider ce choix</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Étudiants enregistrés</h2>
+        <table>
+            <caption>Les trois étudiants fictifs du jeu de données</caption>
+            <thead>
+            <tr>
+                <th scope="col">Nom</th>
+                <th scope="col">Étudiant courant</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="etudiant : ${etudiants}">
+                <td th:text="${etudiant.nom}"></td>
+                <td th:if="${etudiant.id == etudiantCourantId}">
+                    <span class="etudiant-courant">Oui</span>
+                </td>
+                <td th:unless="${etudiant.id == etudiantCourantId}">Non</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: pied}"></footer>
+
+</body>
+</html>

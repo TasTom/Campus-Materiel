@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Fragments communs a toutes les pages : entete, en-tete de page et navigation.
+  Chaque page remplace ces fragments plutot que de dupliquer le balisage.
+-->
+<head th:fragment="entete(titre)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titre} + ' — Campus Matériel'">Campus Matériel</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+
+<header class="bandeau" th:fragment="enTete">
+    <h1>Campus Matériel</h1>
+    <p class="sous-titre">Réservation de matériel pédagogique</p>
+</header>
+
+<nav class="navigation" th:fragment="navigation" aria-label="Navigation principale">
+    <ul>
+        <li><a th:href="@{/materiels}">Matériel disponible</a></li>
+        <li><a th:href="@{/reservations}">Mes réservations</a></li>
+        <li><a th:href="@{/etudiants/selection}">Changer d'étudiant</a></li>
+    </ul>
+</nav>
+
+<footer class="pied" th:fragment="pied">
+    <p>
+        TP BUT Informatique — application locale.
+        La sélection de l'étudiant simule une identité : ce n'est pas une authentification.
+    </p>
+</footer>
+
+</body>
+</html>
