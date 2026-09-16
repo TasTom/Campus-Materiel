@@ -1,0 +1,29 @@
+# --- Build Maven ---
+target/
+!.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# --- Base de données locale H2 (RG-08 : les données persistent hors du dépôt) ---
+data/
+*.db
+*.mv.db
+*.trace.db
+
+# --- Environnements et outils ---
+.venv/
+__pycache__/
+*.py[cod]
+
+# --- IDE ---
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.vscode/
+!.vscode/settings.json
+
+# --- Système ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
