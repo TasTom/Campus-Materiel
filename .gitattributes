@@ -1,9 +1,12 @@
 # Normalisation des fins de ligne
 * text=auto eol=lf
 
-# Fichiers Windows
+# Scripts d'environnement Windows
 *.cmd text eol=crlf
 *.bat text eol=crlf
+
+# Script Maven Wrapper Unix
+/mvnw text eol=lf
 
 # Binaires
 *.pdf binary
