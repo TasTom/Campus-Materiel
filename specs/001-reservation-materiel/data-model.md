@@ -207,14 +207,16 @@ de champ.
 | Matériel inexistant | `MATERIEL_INCONNU` | FR-018 |
 | Réservation active déjà existante sur (matériel, date) par un autre étudiant | `MATERIEL_INDISPONIBLE` | FR-006 |
 | Réservation active déjà existante sur (matériel, date) par l'étudiant courant | `DEJA_RESERVE_PAR_VOUS` | FR-025 |
+| L'étudiant détient déjà deux réservations actives à cette date | `LIMITE_RESERVATIONS_JOUR` | FR-028 |
 | Réservation inexistante | `RESERVATION_INTROUVABLE` | FR-020 |
 | Demandeur non propriétaire | `PAS_PROPRIETAIRE` | FR-010 |
 | Jour réservé déjà passé | `JOUR_RESERVE_PASSE` | FR-012 |
 | Réservation déjà annulée | `DEJA_ANNULEE` | CL-01, FR-013 |
 
-**Ordre des contrôles à la réservation** : date → étudiant courant → matériel → conflit. Cet
-ordre garantit que le message affiché correspond à la première anomalie rencontrée et reste
-stable dans les tests.
+**Ordre des contrôles à la réservation** : date → étudiant courant → matériel → conflit → limite.
+Le conflit est examiné **avant** la limite : si le matériel est déjà occupé, annoncer la limite
+atteinte inciterait l'étudiant à annuler une réservation sans que cela débloque sa demande. Cet
+ordre garantit aussi que le message affiché reste stable dans les tests.
 
 **Ordre des contrôles à l'annulation** : existence → propriétaire → état déjà annulé → date. Le
 contrôle du **propriétaire précède** celui de l'état : un étudiant qui tente d'annuler la
@@ -231,7 +233,7 @@ de la réservation d'autrui.
 | Retrouver la réservation active d'un étudiant | `findByMaterielIdAndDateReservationAndStatutAndEtudiantId(...)` | FR-025 |
 | Lister les réservations d'un étudiant | `findByEtudiantIdOrderByDateReservationDesc(Long)` | FR-009 |
 | Compter les réservations actives d'un couple (matériel, date) | `countByMaterielIdAndDateReservationAndStatut(...)` | vérification de T02 et T12 |
-| Compter les réservations actives d'un étudiant à une date | `countByEtudiantIdAndDateReservationAndStatut(...)` | réservé à l'évolution (RG-04) |
+| Compter les réservations actives d'un étudiant à une date | `countByEtudiantIdAndDateReservationAndStatut(...)` | FR-028 (limite de deux par jour) |
 
 La méthode de comptage est **préparée mais non utilisée** dans cette version : elle sert à
 l'étape d'évolution (limite de deux réservations actives par jour). Elle n'est appelée par aucune

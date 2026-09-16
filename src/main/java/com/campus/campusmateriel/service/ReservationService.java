@@ -34,6 +34,15 @@ import java.util.List;
 @Service
 public class ReservationService {
 
+    /**
+     * Nombre maximal de reservations actives qu'un etudiant peut detenir pour une meme journee.
+     *
+     * <p>Cette limite resulte de l'evolution de RG-04 (FR-008, FR-028). Elle porte sur les
+     * reservations <strong>actives</strong> uniquement : une annulation rend immediatement une
+     * possibilite de reservation (RG-07, SC-007).</p>
+     */
+    public static final long LIMITE_RESERVATIONS_ACTIVES_PAR_JOUR = 2L;
+
     private final ReservationRepository reservationRepository;
     private final MaterielRepository materielRepository;
     private final EtudiantRepository etudiantRepository;
@@ -104,12 +113,14 @@ public class ReservationService {
      *
      * <p><strong>Ordre contractuel des controles</strong> (voir
      * {@code contracts/routes.md}) : la date, puis l'etudiant courant, puis l'existence
-     * du materiel, puis le conflit. Cet ordre est ce qui rend le message affiche
-     * deterministe lorsqu'une requete cumule plusieurs anomalies.</p>
+     * du materiel, puis le conflit, puis la limite du jour. Cet ordre est ce qui rend le
+     * message affiche deterministe lorsqu'une requete cumule plusieurs anomalies.</p>
      *
      * <p>L'ordre place volontairement les controles de date en premier : ils ne
      * dependent d'aucune donnee en base et peuvent donc etre tranches avant toute
-     * lecture.</p>
+     * lecture. Le conflit est examine <strong>avant</strong> la limite : annoncer une limite
+     * atteinte alors que le materiel demande est deja occupe inciterait l'etudiant a
+     * annuler une reservation sans que cela debloque sa demande.</p>
      *
      * <p>En cas de refus, <strong>aucune ecriture</strong> n'a lieu (RG-09).</p>
      *
@@ -130,12 +141,17 @@ public class ReservationService {
         if (etudiantId == null) {
             throw new RegleMetierException(MotifRefus.ETUDIANT_NON_SELECTIONNE);
         }
-        Etudiant etudiant = etudiantRepository.findById(etudiantId)
+        // L'etudiant est charge avec un verrou d'ecriture : deux demandes du meme etudiant
+        // visant deux materiels differents le meme jour sont ainsi serialisees, ce qui rend
+        // la limite du jour fiable. Sans ce verrou, les deux demandes pourraient compter
+        // "une" reservation chacune et passer toutes les deux.
+        Etudiant etudiant = etudiantRepository.findByIdForUpdate(etudiantId)
                 .orElseThrow(() -> new RegleMetierException(MotifRefus.ETUDIANT_INCONNU));
         Materiel materiel = materielRepository.findById(materielId)
                 .orElseThrow(() -> new RegleMetierException(MotifRefus.MATERIEL_INCONNU));
 
         refuserSiDejaReserve(materiel, date, etudiantId);
+        refuserSiLimiteDuJourAtteinte(date, etudiantId);
 
         Reservation reservation = new Reservation(etudiant, materiel, date);
         try {
@@ -145,6 +161,21 @@ public class ReservationService {
             // d'unicite sur la cle technique a arbitre. On traduit en refus metier, sans
             // laisser remonter de detail technique a l'utilisateur (RG-09).
             throw new RegleMetierException(MotifRefus.MATERIEL_INDISPONIBLE);
+        }
+    }
+
+    /**
+     * Refuse la creation si l'etudiant detient deja le nombre maximal de reservations actives
+     * pour cette journee (FR-008, FR-028).
+     *
+     * <p>Seules les reservations actives sont comptees : une annulation rend immediatement
+     * une possibilite (RG-07).</p>
+     */
+    private void refuserSiLimiteDuJourAtteinte(LocalDate date, Long etudiantId) {
+        long dejaActives = reservationRepository.countByEtudiantIdAndDateReservationAndStatut(
+                etudiantId, date, StatutReservation.ACTIVE);
+        if (dejaActives >= LIMITE_RESERVATIONS_ACTIVES_PAR_JOUR) {
+            throw new RegleMetierException(MotifRefus.LIMITE_RESERVATIONS_JOUR);
         }
     }
 

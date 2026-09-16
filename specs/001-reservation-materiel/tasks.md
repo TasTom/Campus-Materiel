@@ -5,9 +5,9 @@ description: "Liste des tâches pour la réservation de matériel pédagogique"
 
 # Tâches : Réservation de matériel pédagogique
 
-**État au 16 septembre 2026** : T001 à T041 terminées et vérifiées (68 tests, aucun échec).
-T042 à T045 concernent l'évolution du besoin et ne doivent être entamées qu'après la validation
-de la recette (section 14 de l'énoncé).
+**État au 16 septembre 2026** : **T001 à T045 terminées et vérifiées** (76 tests, aucun échec).
+L'évolution du besoin (T042 à T045) a été appliquée après la recette, dans l'ordre imposé par
+l'énoncé : documents d'abord, code ensuite.
 
 **Entrée** : documents de conception de `specs/001-reservation-materiel/`
 
@@ -373,25 +373,25 @@ est vérifiée, et la limitation assumée de CA-02 est prouvée.
 **Objet** : traiter la demande du département — « un étudiant ne peut pas avoir plus de deux
 réservations actives pour une même journée ». **Cette phase ne démarre qu'après la recette.**
 
-- [ ] **T042** Reformuler RG-04 dans `docs/enonce.md` et `spec.md` en intégrant la limite, **sans conserver** les deux formulations ; ajouter les exigences et critères d'acceptation correspondants
+- [x] **T042** Reformuler RG-04 dans `docs/enonce.md` et `spec.md` en intégrant la limite, **sans conserver** les deux formulations ; ajouter les exigences et critères d'acceptation correspondants
   - **Résultat** : une seule formulation de RG-04, cohérente
   - **Dépend de** : T036
   - **Vérification** : recherche de « RG-04 » dans les documents : aucune version contradictoire
   - **Exigences** : section 14 de l'énoncé
 
-- [ ] **T043** Mettre à jour le plan, les tâches et le modèle de données pour la nouvelle règle ; relancer l'analyse de cohérence
+- [x] **T043** Mettre à jour le plan, les tâches et le modèle de données pour la nouvelle règle ; relancer l'analyse de cohérence
   - **Résultat** : plan, tâches et modèle reflètent la limite
   - **Dépend de** : T042
   - **Vérification** : `/speckit-analyze` sans contradiction bloquante
   - **Exigences** : section 14 de l'énoncé
 
-- [ ] **T044** Implémenter la limite dans `ReservationService.reserver` en réutilisant la méthode de comptage préparée, puis écrire les trois tests exigés : troisième réservation refusée, nouvelle réservation possible après annulation, réservations sur un autre jour non bloquées
+- [x] **T044** Implémenter la limite dans `ReservationService.reserver` en réutilisant la méthode de comptage préparée, puis écrire les trois tests exigés : troisième réservation refusée, nouvelle réservation possible après annulation, réservations sur un autre jour non bloquées
   - **Résultat** : la règle est appliquée et vérifiée
   - **Dépend de** : T043
   - **Vérification** : `.\mvnw.cmd test` passe ; les trois nouveaux tests échouent si la limite est retirée
   - **Exigences** : section 14 de l'énoncé
 
-- [ ] **T045** [P] Consigner dans `docs/journal-decisions.md` l'erreur qu'aurait produite une modification du code sans mise à jour des documents
+- [x] **T045** [P] Consigner dans `docs/journal-decisions.md` l'erreur qu'aurait produite une modification du code sans mise à jour des documents
   - **Résultat** : la question posée en section 14 de l'énoncé est traitée
   - **Dépend de** : T044
   - **Vérification** : relecture

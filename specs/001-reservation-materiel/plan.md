@@ -200,7 +200,7 @@ Toutes les règles sont implémentées dans `ReservationService`, à un seul end
 | RG-01 | `reserver` | Un étudiant, un matériel et une date non nuls sont réunis |
 | RG-02 | `reserver` | Aucune autre réservation active pour ce matériel à cette date |
 | RG-03 | `reserver` | `dateReservation` n'est pas antérieure à `LocalDate.now(clock)` |
-| RG-04 | `reserver` | Aucune limite au nombre de réservations d'un étudiant pour un jour |
+| RG-04 | `reserver` | Au plus deux réservations **actives** de l'étudiant pour une journée (limite intégrée par l'évolution du besoin) |
 | RG-05 | `annuler` | L'étudiant passé en paramètre est le propriétaire de la réservation |
 | RG-06 | `annuler` | `LocalDate.now(clock)` n'est pas postérieure à la date réservée |
 | RG-07 | `annuler` | L'enregistrement est conservé et son état devient annulé |
@@ -211,15 +211,13 @@ Le service ne connaît ni `HttpServletRequest` ni la session : il reçoit l'iden
 l'étudiant courant en paramètre explicite. Il est donc testable sans conteneur Web.
 
 ### Mécanisme empêchant une double réservation
-
 Le mécanisme est **double**, car un contrôle unique est insuffisant :
 
 1. **Contrôle applicatif dans `ReservationService.reserver`** : avant l'enregistrement, le
    service interroge le repository pour savoir si une réservation active existe déjà pour le
    même matériel et la même date. Si c'est le cas, il lève une erreur métier et n'écrit rien.
    Ce contrôle produit le message compréhensible attendu par RG-09 et distingue, pour FR-025, le
-   cas où l'étudiant courant est déjà propriétaire de cette réservation.
-2. **Contrainte de base de données** : une contrainte d'unicité sur (matériel, date) pour les
+   cas où l'étudiant courant est déjà propriétaire de cette réservation.2. **Contrainte de base de données** : une contrainte d'unicité sur (matériel, date) pour les
    seules réservations actives garantit qu'aucune seconde ligne active ne peut être écrite, même
    si deux demandes arrivent au même instant et passent toutes les deux le contrôle applicatif.
 

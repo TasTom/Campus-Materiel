@@ -4,10 +4,13 @@
 
 **Créé le** : 2026-09-16
 
-**Statut** : Clarifiée — en attente de validation (Jalon 1)
+**Statut** : Clarifiée puis étendue — en attente de validation (Jalon 1)
 
 **Clarifications** : les ambiguïtés A-01 à A-03 ont été tranchées le 2026-09-16 (voir
 « Décisions de clarification » : CA-01, CA-02, CA-03).
+
+**Évolution** : le 2026-09-16, la limite de deux réservations actives par étudiant et par jour a
+été intégrée (voir « Évolution du besoin »).
 
 **Entrée** : description issue de `docs/enonce.md` — « Décris la fonctionnalité de réservation
 de matériel de Campus Matériel. Organise les besoins en histoires utilisateur priorisées.
@@ -139,6 +142,15 @@ réservation apparaît comme active ; réserver le même matériel à la même d
 10. **Étant donné** qu'aucun étudiant courant n'a été sélectionné, **quand** une réservation
     est demandée, **alors** la demande est refusée et l'application invite à choisir un
     étudiant.
+11. **Étant donné** qu'Alice détient deux réservations actives pour le 12 mars 2030, **quand**
+    elle demande un troisième matériel pour le 12 mars 2030, **alors** sa demande est refusée
+    avec un message indiquant la limite atteinte, **et** aucune réservation n'est créée.
+12. **Étant donné** qu'Alice détient deux réservations actives pour le 12 mars 2030 et qu'elle
+    en annule une, **quand** elle demande un autre matériel pour le 12 mars 2030, **alors** la
+    réservation est acceptée : une annulation rend immédiatement une possibilité.
+13. **Étant donné** qu'Alice détient deux réservations actives pour le 12 mars 2030, **quand**
+    elle demande un matériel pour le 13 mars 2030, **alors** la réservation est acceptée : la
+    limite porte sur une journée, pas sur la durée de vie du compte.
 
 ---
 
@@ -221,6 +233,8 @@ devient « annulée » et que le matériel redevient disponible à cette date.
 | CL-07 | Deux demandes de réservation simultanées visant le même matériel à la même date | Au plus une seule réservation active est enregistrée |
 | CL-08 | Annulation par un étudiant qui n'est pas le propriétaire, via une requête directe au serveur | Refus ; la réservation reste inchangée |
 | CL-09 | Un étudiant réserve le même matériel à deux dates différentes | Les deux réservations sont acceptées |
+| CL-10 | Un étudiant détenant déjà deux réservations actives pour une journée en demande une troisième, sur un matériel **disponible** | Refus pour limite atteinte ; aucune création |
+| CL-11 | Un étudiant détenant déjà deux réservations actives pour une journée demande un matériel **déjà occupé** ce jour-là | Refus pour indisponibilité du matériel : le motif d'indisponibilité est examiné avant celui de la limite, pour ne pas inciter l'étudiant à annuler une réservation sans que cela débloque sa demande |
 
 ---
 
@@ -240,7 +254,7 @@ Chaque exigence est vérifiable indépendamment. La colonne « Règle » indique
 | FR-005 | Le système DOIT permettre de réserver un équipement pour une journée, pour l'étudiant courant. | RG-01 |
 | FR-006 | Le système DOIT refuser de créer une seconde réservation active pour le même équipement à la même date, avec un message indiquant l'indisponibilité. | RG-02 |
 | FR-007 | Le système DOIT accepter une date de réservation égale à la date courante ou postérieure, et refuser toute date antérieure. | RG-03 |
-| FR-008 | Le système DOIT permettre à un étudiant de détenir plusieurs réservations actives à la même date, sur des équipements différents. | RG-04 |
+| FR-008 | Le système DOIT permettre à un étudiant de détenir **au plus deux réservations actives** à la même date, sur des équipements différents. | RG-04 |
 | FR-009 | Le système DOIT permettre à l'étudiant courant de consulter uniquement les réservations dont il est le propriétaire. | RG-05 |
 | FR-010 | Le système DOIT refuser une annulation demandée par un étudiant autre que le propriétaire de la réservation. | RG-05 |
 | FR-011 | Le système DOIT accepter une annulation tant que le jour réservé n'est pas passé, jour réservé inclus. | RG-06 |
@@ -260,6 +274,7 @@ Chaque exigence est vérifiable indépendamment. La colonne « Règle » indique
 | FR-025 | Lorsqu'un étudiant demande un matériel qu'il a lui-même déjà réservé à la même date, le système DOIT refuser la demande avec un message qui distingue ce cas de l'indisponibilité générale. | RG-02 |
 | FR-026 | Le système DOIT conserver l'origine d'une annulation : annulation demandée par l'étudiant ou annulation administrative. | RG-07 |
 | FR-027 | L'application DOIT attribuer l'origine « annulation demandée par l'étudiant » à toute annulation qu'elle réalise, aucune interface d'administration n'existant dans ce périmètre. | RG-07 |
+| FR-028 | Le système DOIT refuser une réservation qui porterait à trois le nombre de réservations actives d'un étudiant pour une même journée, avec un message indiquant la limite atteinte. | RG-04 |
 
 ### Entités clés
 
@@ -301,12 +316,15 @@ mais au plus une seule active pour une date donnée (les réservations annulées
   enregistrées sont toujours présentes, avec leur état.
 - **SC-004** : 100 % des 12 scénarios de recette T01 à T12 de `docs/enonce.md` produisent le
   résultat attendu.
-- **SC-005** : 100 % des exigences FR-001 à FR-027 sont couvertes par au moins une vérification
+- **SC-005** : 100 % des exigences FR-001 à FR-028 sont couvertes par au moins une vérification
   et figurent dans la matrice de traçabilité.
 - **SC-006** : toute saisie invalide produit un message compréhensible en français, et le nombre
   d'enregistrements modifiés est nul.
 - **SC-007** : un étudiant constate qu'un équipement libéré par annulation est de nouveau
   réservable à la date concernée, sans intervention manuelle sur les données.
+- **SC-008** : sur une série de demandes d'un même étudiant visant une même journée, la base ne
+  contient jamais plus de deux réservations actives pour cet étudiant, et une annulation rend
+  immédiatement une possibilité de réservation.
 
 ---
 
@@ -339,7 +357,7 @@ dans `docs/journal-decisions.md`.
 |---|---|---|---|
 | CA-01 | Un étudiant re-réservant un matériel qu'il a lui-même déjà réservé doit-il recevoir un message distinct de l'indisponibilité générale ? | **Oui.** Le message précise que l'étudiant a déjà réservé ce matériel pour cette date. Le refus reste le même : aucune réservation n'est créée. | FR-025 ajoutée ; scénario 7 de l'histoire 3 précisé |
 | CA-02 | L'état d'une réservation doit-il distinguer l'origine d'une annulation ? | **Oui.** Trois états : active, annulée par l'étudiant, annulée par l'administration. Cette décision **étend** le modèle minimal de l'énoncé et s'écarte de la solution de référence, qui ne prévoit que deux états. | FR-026 et FR-027 ajoutées ; section « Entités clés » précisée |
-| CA-03 | La limite de deux réservations actives par étudiant et par jour doit-elle figurer dans cette version ? | **Non.** Elle reste hors périmètre et sera traitée comme une évolution, en commençant par la reformulation de RG-04. | Déjà présente dans les exclusions du périmètre ; décision tracée au journal (`docs/journal-decisions.md`, D-08) |
+| CA-03 | La limite de deux réservations actives par étudiant et par jour doit-elle figurer dans cette version ? | **Non, en première version.** La décision a ensuite été **révisée** par l'évolution du besoin : la limite est désormais en périmètre. | Décision initiale tracée au journal (`docs/journal-decisions.md`, D-08) ; révision tracée en D-13. Voir « Évolution du besoin ». |
 
 ### Réponses imposées par l'énoncé (rappel)
 
@@ -366,8 +384,30 @@ Cette version **ne comporte pas** :
 - de gestion des retards et des pénalités ;
 - de réservations sur plusieurs jours ;
 - de réservations par créneau horaire ;
-- d'ajout ou de suppression de matériel par une interface d'administration ;
-- de limite au nombre de réservations actives d'un étudiant pour une même journée.
+- d'ajout ou de suppression de matériel par une interface d'administration.
+
+**Cette liste a évolué :** la limite du nombre de réservations actives par étudiant et par jour
+y figurait ici lors de la première version. Elle a été intégrée par l'évolution du besoin
+(voir « Évolution du besoin » ci-dessous).
+
+## Évolution du besoin
+
+Après la recette, le département a demandé qu'un étudiant ne puisse pas avoir plus de deux
+réservations actives pour une même journée. Cette demande a été traitée en commençant par les
+documents, jamais par le code.
+
+| Étape | Ce qui a changé |
+|---|---|
+| Règle | RG-04 reformulée : la permission est conservée, la limite est ajoutée **dans la même phrase**. L'ancienne formulation a été remplacée, non conservée : deux énoncés contradictoires de la même règle sont interdits. |
+| Exigences | FR-008 reformulée (« au plus deux »), FR-028 ajoutée (refus de la troisième avec message) |
+| Critères d'acceptation | Scénarios 11, 12 et 13 de l'histoire 3 |
+| Cas limites | CL-10 (limite atteinte) et CL-11 (indisponibilité prioritaire) |
+| Critère de succès | SC-008 |
+| Décision CA-03 | Révisée : la limite était hors périmètre en première version, elle est désormais en périmètre |
+
+**Point de vigilance :** la limite porte sur les réservations **actives** uniquement. Les
+réservations annulées ne consomment pas le quota — sans quoi une annulation ne rendrait pas
+immédiatement une possibilité, ce qui contredirait RG-07 et SC-007.
 
 Toute demande relevant de cette liste doit faire l'objet d'une décision explicite du binôme et
 d'une mise à jour préalable de la spécification, du plan et des tâches.
@@ -388,3 +428,6 @@ d'une mise à jour préalable de la spécification, du plan et des tâches.
 | T10 | 3 | FR-019, FR-016 |
 | T11 | 5 | FR-013, FR-016, FR-026 |
 | T12 | 3 | FR-021 |
+| T13 | 3 | FR-008, FR-028 |
+| T14 | 3 | FR-008, FR-014, FR-028 |
+| T15 | 3 | FR-008 |

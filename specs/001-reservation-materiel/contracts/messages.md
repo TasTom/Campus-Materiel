@@ -26,6 +26,7 @@ pas sur la formulation, afin qu'une reformulation ne casse pas les tests.
 | `DATE_PASSEE` | « La date choisie est déjà passée. Choisissez aujourd'hui ou une date future. » | Aucune | FR-007, FR-016 |
 | `MATERIEL_INDISPONIBLE` | « Ce matériel est déjà réservé à cette date. » | Aucune | FR-006, FR-021 |
 | `DEJA_RESERVE_PAR_VOUS` | « Vous avez déjà réservé ce matériel pour cette date. » | Aucune | FR-025 |
+| `LIMITE_RESERVATIONS_JOUR` | « Vous avez déjà deux réservations actives pour cette date. Annulez-en une pour pouvoir réserver un autre matériel ce jour-là. » | Aucune | FR-028 |
 | `RESERVATION_INTROUVABLE` | « Cette réservation n'existe pas. » | Aucune | FR-020 |
 | `PAS_PROPRIETAIRE` | « Vous ne pouvez annuler que vos propres réservations. » | Aucune | FR-010 |
 | `JOUR_RESERVE_PASSE` | « La date de cette réservation est passée : elle ne peut plus être annulée. » | Aucune | FR-012 |
@@ -35,6 +36,11 @@ pas sur la formulation, afin qu'une reformulation ne casse pas les tests.
 `DEJA_RESERVE_PAR_VOUS` produisent **deux messages différents** pour un même refus. Un test doit
 vérifier que les deux codes sont bien distincts selon le propriétaire de la réservation
 existante.
+
+**Priorité des motifs (évolution du besoin)** : `MATERIEL_INDISPONIBLE` est examiné **avant**
+`LIMITE_RESERVATIONS_JOUR`. Si le matériel demandé est déjà occupé, l'étudiant reçoit le motif
+d'indisponibilité, même s'il a par ailleurs atteint sa limite du jour : annoncer la limite
+l'inciterait à annuler une réservation sans que cela débloque sa demande.
 
 ---
 

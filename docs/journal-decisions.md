@@ -297,6 +297,77 @@ du test ; il serait passé inaperçu si le test avait été vérifié isolément
 
 ---
 
+## D-13 — Évolution du besoin : limite de deux réservations actives par jour
+
+**Date :** 16 septembre 2026
+**Contexte :** après la recette, le département a demandé qu'un étudiant ne puisse pas avoir plus
+de deux réservations actives pour une même journée. Cette demande avait été explicitement
+écartée en première version (D-08/CA-03) et devait donc être traitée comme une évolution, en
+commençant par les documents.
+
+**Ordre de traitement imposé par l'énoncé (section 14) et suivi :**
+
+| Étape | Ce qui a été fait |
+|---|---|
+| 1. Identifier la règle concernée | RG-04 (« un étudiant peut réserver plusieurs équipements pour une même journée ») |
+| 2. Reformuler la règle | La permission et la limite sont désormais **dans la même phrase**. L'ancienne formulation a été **remplacée**, pas conservée : deux énoncés contradictoires de la même règle sont interdits par l'énoncé. |
+| 3. Ajouter les critères d'acceptation | Scénarios 11, 12 et 13 de l'histoire 3 ; cas limites CL-10 et CL-11 ; exigences FR-008 (reformulée) et FR-028 (ajoutée) ; critère de succès SC-008 |
+| 4. Actualiser plan et tâches | Plan (tableau des règles et ordre des contrôles), modèle de données, contrats des routes et des messages, `tasks.md` |
+| 5. Relancer l'analyse de cohérence | Contrôles de cohérence refaits après implémentation |
+| 6. Implémenter et vérifier | `ReservationService.refuserSiLimiteDuJourAtteinte` + 8 tests, dont un test de concurrence |
+
+**Décisions techniques prises :**
+
+1. **La limite porte sur les réservations actives uniquement.** Les réservations annulées ne
+   consomment pas le quota : sans cela, une annulation ne rendrait pas immédiatement une
+   possibilité de réservation, ce qui contredirait RG-07 et SC-007.
+2. **Le conflit est examiné avant la limite.** Si le matériel demandé est déjà occupé, l'étudiant
+   reçoit le motif d'indisponibilité, même s'il a par ailleurs atteint sa limite. Annoncer la
+   limite l'inciterait à annuler une réservation sans que cela débloque sa demande.
+3. **Un verrou d'écriture est posé sur l'étudiant** pendant la transaction de réservation
+   (`EtudiantRepository.findByIdForUpdate`).
+
+**Pourquoi le verrou a été ajouté — et comment la nécessité a été vérifiée :**
+
+La protection existante (contrainte d'unicité sur la clé technique) ne couvre que le conflit
+entre deux étudiants visant le **même** matériel. Deux demandes du **même** étudiant visant deux
+matériels **différents** ne sont départagées par aucune contrainte de base : sans verrou, chaque
+demande compte « une » réservation avant que l'autre n'ait écrit, et les deux passent.
+
+La nécessité du verrou n'a pas été supposée : elle a été **mesurée**. Le test de concurrence a été
+lancé huit fois avec le verrou, puis huit fois sans lui.
+
+| Configuration | Résultat sur 8 exécutions |
+|---|---|
+| `findByIdForUpdate` (verrou d'écriture sur l'étudiant) | **8 réussites / 8** |
+| `findById` (aucun verrou) | **6 échecs / 8** |
+
+Le test échoue donc bien en l'absence de la protection : il prouve quelque chose. Sans cette
+vérification, le commentaire affirmant que le verrou est nécessaire aurait été une simple
+déclaration.
+
+**Leçon retenue :** un test de concurrence qui passe ne prouve rien s'il n'a jamais été observé
+en échec. La seule façon de savoir s'il détecte réellement le défaut est de retirer la protection
+et de constater qu'il tombe. C'est le même raisonnement que pour la contrainte d'unicité : la
+protection doit être vérifiée par un test qui échoue sans elle.
+
+**Réponse à la question de l'énoncé (« quelle erreur aurait pu apparaître si vous aviez uniquement
+demandé à l'IA de modifier le code ? ») :**
+
+Modifier directement le code aurait produit trois erreurs, toutes visibles dans les documents :
+
+1. **Deux formulations contradictoires de RG-04.** L'ancienne phrase autorisait sans limite ;
+   l'ajouter au code sans corriger le texte aurait laissé un document contredisant le programme,
+   exactement ce que l'énoncé interdit de conserver.
+2. **Un message trompeur.** Sans avoir écrit la règle avant le code, le cas « limite atteinte sur un
+   matériel déjà réservé » aurait été arbitré au hasard. C'est le cas limite CL-11 : le traitement
+   retenu (indisponibilité prioritaire) est une décision, pas une évidence.
+3. **Une limite fausse sous concurrence.** Le code aurait probablement compté les réservations sans
+   verrou, et la limite aurait été dépassée sans que personne ne le voie — les demandes
+   simultanées ne se produisent jamais pendant une démonstration.
+
+---
+
 ## Propositions de l'IA corrigées, refusées ou précisées
 
 | # | Proposition initiale | Décision du binôme | Motif |
@@ -312,5 +383,7 @@ du test ; il serait passé inaperçu si le test avait été vérifié isolément
 | 9 | Laisser les cases des tâches à « à faire » alors qu'elles étaient réalisées | Corrigée | Un suivi d'avancement faux est une incohérence documentaire : les cases ont été mises à jour (D-10) |
 | 10 | Affirmer dans le modèle de données qu'une méthode servait à FR-004 alors qu'elle n'était jamais appelée | Corrigée | Méthode supprimée et document corrigé (D-12) |
 | 11 | Écrire les libellés « Disponible » / « Réservé » et le message de liste vide en dur dans le gabarit | Corrigée | Les textes proviennent du modèle, un seul exemplaire par texte (D-12) |
+| 12 | Compter les réservations pour appliquer la limite, sans protection contre les demandes concurrentes du même étudiant | Corrigée après mesure | Sans verrou, le test de concurrence échoue 6 fois sur 8 : la limite pouvait être dépassée (D-13) |
+| 13 | Annoncer la limite atteinte même lorsque le matériel demandé est déjà occupé | Corrigée | Message trompeur : il incite l'étudiant à annuler une réservation sans que cela débloque sa demande (D-13) |
 
 *Ce tableau est complété au fil du projet.*

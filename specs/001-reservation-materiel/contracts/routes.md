@@ -129,16 +129,22 @@ Il est lu depuis la session (R-06). Un paramètre `etudiantId` envoyé par le cl
 | Date antérieure à la date courante | `DATE_PASSEE` | Retour avec message explicite |
 | Réservation active existante sur (matériel, date), propriétaire = un autre étudiant | `MATERIEL_INDISPONIBLE` | Retour avec message d'indisponibilité |
 | Réservation active existante sur (matériel, date), propriétaire = l'étudiant courant | `DEJA_RESERVE_PAR_VOUS` | Retour avec message distinct (FR-025) |
+| L'étudiant détient déjà le nombre maximal de réservations actives à cette date | `LIMITE_RESERVATIONS_JOUR` | Retour avec message indiquant la limite (FR-028) |
 | Violation de la contrainte d'unicité lors de l'écriture (demande concurrente) | `MATERIEL_INDISPONIBLE` | Retour avec message d'indisponibilité |
 
-**Ordre d'évaluation des contrôles** : date → étudiant courant → matériel → conflit. Cet ordre est
-contractuel : les tests s'y appuient.
+**Ordre d'évaluation des contrôles** : date → étudiant courant → matériel → conflit → limite du
+jour. Cet ordre est contractuel : les tests s'y appuient. Le conflit précède la limite, afin de ne
+pas annoncer une limite atteinte pour une demande qui échouerait de toute façon.
 
 **Cas autorisés explicitement** :
 
 - réserver le jour même (date réservée = date courante) ;
-- réserver plusieurs matériels différents à la même date pour le même étudiant (RG-04, FR-008) ;
-- réserver le même matériel à deux dates différentes.
+- détenir **jusqu'à deux** réservations actives à la même date, sur des matériels différents
+  (RG-04, FR-008) ;
+- réserver le même matériel à deux dates différentes ;
+- réserver à nouveau pour une journée où une réservation a été annulée : les réservations
+  annulées ne consomment pas le quota (RG-07) ;
+- réserver pour une autre journée alors que la limite est atteinte pour une journée donnée.
 
 **Exigences** : FR-005 à FR-008, FR-016 à FR-019, FR-021, FR-025 · RG-01, RG-02, RG-03, RG-04, RG-09.
 

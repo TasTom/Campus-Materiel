@@ -36,6 +36,15 @@ public enum MotifRefus {
     /** L'etudiant courant a deja reserve ce materiel pour cette date (motif distinct). */
     DEJA_RESERVE_PAR_VOUS,
 
+    /**
+     * L'etudiant courant detient deja le nombre maximal de reservations actives pour ce jour.
+     *
+     * <p>Ce motif est examine <strong>apres</strong> celui d'indisponibilite : annoncer la
+     * limite atteinte alors que le materiel demande est deja occupe inciterait l'etudiant a
+     * annuler une reservation sans que cela debloque sa demande.</p>
+     */
+    LIMITE_RESERVATIONS_JOUR,
+
     /** Aucune reservation ne correspond a l'identifiant demande. */
     RESERVATION_INTROUVABLE,
 

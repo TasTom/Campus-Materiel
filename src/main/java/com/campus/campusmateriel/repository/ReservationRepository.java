@@ -55,10 +55,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     /**
      * Compte les reservations actives d'un etudiant a une date.
      *
-     * <p><strong>Non utilisee dans cette version.</strong> Elle est prevue pour l'etape
-     * d'evolution (limite de deux reservations actives par jour). Aucune regle de la
-     * version actuelle ne l'appelle. Si le binome prefere ne rien preparer, cette methode
-     * peut etre retiree : l'evolution n'en a pas besoin pour demarrer.</p>
+     * <p>Porte la limite de deux reservations actives par journee (FR-008, FR-028) :
+     * {@code ReservationService.refuserSiLimiteDuJourAtteinte} compare ce compte a la limite
+     * avant toute ecriture. Seules les reservations actives sont comptees, afin qu'une
+     * annulation rende immediatement une possibilite (RG-07).</p>
      */
     long countByEtudiantIdAndDateReservationAndStatut(
             Long etudiantId, LocalDate dateReservation, StatutReservation statut);

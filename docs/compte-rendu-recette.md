@@ -15,11 +15,11 @@ réussi sur la seule affirmation d'un outil ou d'un assistant.
 Commande exécutée : `.\mvnw.cmd test`
 
 ```
-[INFO] Tests run: 68, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 76, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 
-**Statut : conforme.** 68 tests, aucun échec.
+**Statut : conforme.** 76 tests, aucun échec.
 
 | Classe de test | Tests | Statut |
 |---|---:|---|
@@ -27,6 +27,7 @@ Commande exécutée : `.\mvnw.cmd test`
 | `ReservationServiceDisponibiliteTest` | 6 | Conforme |
 | `ReservationServiceReservationTest` | 13 | Conforme |
 | `ReservationServiceAnnulationTest` | 10 | Conforme |
+| `LimiteReservationsJourTest` | 8 | Conforme |
 | `EtudiantControllerTest` | 5 | Conforme |
 | `ReservationCreationTest` | 9 | Conforme |
 | `ReservationListeTest` | 9 | Conforme |
@@ -161,6 +162,60 @@ Commande exécutée : `.\mvnw.cmd test`
 
 ---
 
+## 2 bis. Scénarios de l'évolution (T13 à T15)
+
+Ces scénarios ont été ajoutés par l'évolution du besoin (section 14 de l'énoncé), après la
+première recette.
+
+### T13 — Alice a deux réservations actives le 12 ; elle demande un troisième matériel pour le 12
+
+- **Mode** : automatisé (`LimiteReservationsJourTest.t13TroisiemeReservationRefusee`)
+- **Résultat obtenu** : refus, motif `LIMITE_RESERVATIONS_JOUR`. Le compte de réservations actives
+  d'Alice pour cette journée reste à **2** : le refus n'a rien écrit.
+- **Statut** : **conforme**
+- **Anomalie** : aucune
+
+### T13 (variante concurrente) — Deux demandes simultanées du même étudiant
+
+- **Mode** : automatisé (`t13DeuxDemandesConcurrentesNeDepassentPasLaLimite`)
+- **Préparation** : Alice détient une réservation ; il ne reste qu'une place sur les deux. Deux
+  demandes simultanées visent deux matériels **différents**, de sorte qu'aucune contrainte
+  d'unicité ne peut les départager.
+- **Résultat obtenu** : une seule demande aboutit, l'autre est refusée pour `LIMITE_RESERVATIONS_JOUR`.
+  Le compte final est de **2**, jamais 3.
+- **Vérification de la valeur du test** : lancé 8 fois avec le verrou (8 réussites) puis 8 fois
+  sans lui (6 échecs). Le test échoue donc bien en l'absence de la protection.
+- **Statut** : **conforme**
+- **Anomalie** : aucune après correction de A-7
+
+### T14 — Après une annulation, une nouvelle réservation devient possible
+
+- **Mode** : automatisé (`t14ApresAnnulationReservationPossible`)
+- **Résultat obtenu** : après annulation d'une des deux réservations, une nouvelle réservation est
+  acceptée ; le compte actif revient à 2. Une réservation annulée ne consomme donc pas le quota.
+- **Statut** : **conforme**
+- **Anomalie** : aucune
+
+### T15 — Deux réservations un jour n'empêchent pas une réservation un autre jour
+
+- **Mode** : automatisé (`t15AutreJourToujoursPossible`)
+- **Résultat obtenu** : la réservation pour le 13 mars est acceptée alors que la limite est
+  atteinte pour le 12 mars. La limite porte bien sur une journée et non sur la durée de vie du
+  compte.
+- **Statut** : **conforme**
+- **Anomalie** : aucune
+
+### Vérifications complémentaires de l'évolution
+
+| Vérification | Test | Résultat |
+|---|---|---|
+| La limite vaut bien deux | `laLimiteVautDeux` | Conforme |
+| La limite est propre à chaque étudiant | `limitePropreAChaqueEtudiant` | Conforme |
+| L'indisponibilité est annoncée avant la limite atteinte (CL-11) | `indisponibiliteAvantLimite` | Conforme |
+| Le conflit avec sa propre réservation est annoncé avant la limite | `conflitAvantLimite` | Conforme |
+
+---
+
 ## 3. Vérifications complémentaires menées dans l'interface
 
 | Vérification | Résultat observé | Statut |
@@ -188,6 +243,17 @@ montrent l'utilité de la vérification automatisée.
 | A-4 | Le paquet `AutoConfigureMockMvc` a changé en Spring Boot 4 | Compilation des tests | Import corrigé vers `org.springframework.boot.webmvc.test.autoconfigure` | Corrigée |
 | A-5 | Un test qui vidait la table du matériel a fait échouer **37 autres tests** en cascade : le jeu de données fictif n'est inséré qu'au démarrage du contexte Spring, et tous les tests partagent la même base en mémoire | Exécution complète de la suite | Restauration du jeu de données dans un bloc `finally`, avec un commentaire expliquant le partage d'état | Corrigée |
 | A-6 | L'assertion sur le message de liste vide échouait alors que le message s'affichait : Thymeleaf échappe les apostrophes en HTML (`&#39;`) | Exécution du test A-5 | Assertion portée sur un fragment sans apostrophe | Corrigée |
+| A-7 | **La limite de deux réservations pouvait être dépassée sous concurrence.** Deux demandes du même étudiant visant deux matériels différents n'étaient départagées par aucune protection : chaque demande comptait « une » réservation avant que l'autre n'ait écrit | Mesure délibérée : le test de concurrence a été lancé **8 fois avec le verrou, puis 8 fois sans lui** | Ajout d'un verrou d'écriture sur l'étudiant (`EtudiantRepository.findByIdForUpdate`), posé au début de la transaction de réservation | Corrigée et **prouvée** |
+
+### Mesure de l'anomalie A-7
+
+| Configuration | Résultat sur 8 exécutions |
+|---|---|
+| `findByIdForUpdate` (verrou d'écriture sur l'étudiant) | **8 réussites / 8** |
+| `findById` (aucun verrou) | **6 échecs / 8** |
+
+Cette mesure est ce qui distingue une protection vérifiée d'une protection supposée. Un test de
+concurrence qui passe n'a de valeur que s'il a été observé en échec lorsque la protection manque.
 
 **Anomalies non corrigées restantes : aucune.**
 
@@ -204,6 +270,7 @@ montrent l'utilité de la vérification automatisée.
 | SC-005 | Chaque exigence est couverte et tracée | Voir `docs/matrice-tracabilite.md` | Atteint |
 | SC-006 | Toute saisie invalide produit un message compréhensible, sans écriture | T04, T10, T11 : messages conformes, aucune écriture | Atteint |
 | SC-007 | Un équipement libéré est de nouveau réservable | T06 puis T07 : conforme | Atteint |
+| SC-008 | Jamais plus de deux réservations actives par étudiant et par jour ; une annulation rend une possibilité | T13, T14, T15 et le test de concurrence : conformes | Atteint |
 
 ---
 
@@ -216,11 +283,12 @@ montrent l'utilité de la vérification automatisée.
 - **L'état `ANNULEE_ADMINISTRATIVE` n'est jamais produit.** Il est défini dans le modèle sur
   décision CA-02 et son absence d'utilisation est garantie par un test (FR-027).
 - **Une méthode de repository n'est pas appelée.**
-  `ReservationRepository.countByEtudiantIdAndDateReservationAndStatut` est préparée pour la
-  limite de deux réservations par jour et n'est utilisée par aucune règle de cette version.
-  `data-model.md` signale explicitement qu'elle peut être supprimée sans gêner l'évolution.
-- **La limite de deux réservations actives par jour n'est pas implémentée.** Elle relève de
-  l'étape d'évolution du TP.
+  `ReservationRepository.countByMaterielIdAndDateReservationAndStatut` est utilisée par les
+  vérifications de conflit ; `countByEtudiantIdAndDateReservationAndStatut` porte désormais la
+  limite du jour (FR-028). Aucune méthode de repository ne reste inutilisée.
+- **La limite de deux réservations actives par jour est implémentée** (évolution du besoin).
+  Elle a été appliquée après la recette, documents d'abord, conformément à la section 14 de
+  l'énoncé. Voir `docs/journal-decisions.md` D-13.
 - **La vérification T09 reste manuelle.** Un test automatisé qui redémarrerait réellement
   l'application n'a pas été mis en place ; l'énoncé l'autorise explicitement.
 
@@ -228,14 +296,17 @@ montrent l'utilité de la vérification automatisée.
 
 ## 7. Conclusion
 
-**Recette : conforme.** Les 12 scénarios produisent le résultat attendu, les 68 tests automatisés
-passent, les 7 critères de succès sont atteints, et aucune anomalie ne reste ouverte.
+**Recette : conforme.** Les 15 scénarios produisent le résultat attendu (T01 à T15), les 76 tests
+automatisés passent, les 8 critères de succès sont atteints, et aucune anomalie ne reste ouverte.
 
-Les six anomalies rencontrées ont toutes été détectées **par l'exécution** : quatre par les tests
-avant la recette, deux pendant l'ajout d'un test de complétude. Aucune n'a été repérée par
-relecture seule, ce qui confirme l'intérêt du principe IV de la constitution (« chaque règle
-métier possède une vérification exécutable »).
+Les sept anomalies rencontrées ont toutes été détectées **par l'exécution** : quatre par les tests
+avant la recette, deux pendant l'ajout d'un test de complétude, une par une mesure délibérée. Aucune
+n'a été repérée par relecture seule, ce qui confirme le principe IV de la constitution.
 
-L'anomalie A-5 mérite d'être retenue : un test **correct** dans son intention peut casser la
-suite entière s'il modifie un état partagé. C'est un argument de plus contre la relecture
-comme unique moyen de vérification.
+Deux anomalies méritent d'être retenues :
+
+- **A-5** : un test **correct dans son intention** peut casser la suite entière s'il modifie un état
+  partagé. C'est un argument de plus contre la relecture comme unique moyen de vérification.
+- **A-7** : la limite de deux réservations était fausse sous concurrence. Aucune relecture ne
+  l'aurait montrée, et aucune démonstration ne l'aurait déclenchée. Seule la mesure — retirer la
+  protection et constater l'échec — a permis de l'établir et de la corriger.

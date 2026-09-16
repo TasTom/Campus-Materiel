@@ -133,7 +133,7 @@ authentification.** Chacun peut changer d'étudiant.
 | `specs/001-reservation-materiel/tasks.md` | Tâches T001 à T045, dépendances et points de contrôle |
 | `specs/001-reservation-materiel/checklists/` | Checklists qualité des exigences |
 | `src/main/java/com/campus/campusmateriel/` | Code de l'application |
-| `src/test/java/com/campus/campusmateriel/` | 68 tests automatisés |
+| `src/test/java/com/campus/campusmateriel/` | 76 tests automatisés |
 | `.github/skills/` | Commandes Spec Kit pour GitHub Copilot |
 | `.github/copilot-instructions.md` | Consignes de travail de l'agent |
 

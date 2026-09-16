@@ -37,6 +37,9 @@ public class MessagesRefusService {
                     "Ce matériel est déjà réservé à cette date.";
             case DEJA_RESERVE_PAR_VOUS ->
                     "Vous avez déjà réservé ce matériel pour cette date.";
+            case LIMITE_RESERVATIONS_JOUR ->
+                    "Vous avez déjà deux réservations actives pour cette date. "
+                            + "Annulez-en une pour pouvoir réserver un autre matériel ce jour-là.";
             case RESERVATION_INTROUVABLE ->
                     "Cette réservation n'existe pas.";
             case PAS_PROPRIETAIRE ->

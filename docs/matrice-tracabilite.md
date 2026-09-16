@@ -17,7 +17,7 @@ orphelin.
 | RG-01 — Réservation = étudiant + équipement + date | FR-005, FR-023 | T006, T020 | `Reservation` (`@ManyToOne` obligatoires, `LocalDate`) | `ReservationServiceReservationTest`, `DonneesDemoTest.chaqueExemplaireAUnCodeDistinct` | T01, T05 |
 | RG-02 — Une seule réservation active par équipement et par date | FR-004, FR-006, FR-021, FR-025 | T006, T015, T020 | `ReservationService.refuserSiDejaReserve`, colonne `cle_active` unique | `ReservationServiceReservationTest.t02…`, `ConflitConcurrentTest` | T02, T07, T12 |
 | RG-03 — Aujourd'hui ou futur, jamais passé | FR-007 | T020 | `ReservationService.reserver` (`date.isBefore(aujourdHui())`) | `ReservationServiceReservationTest.t04DatePasseeRefusee`, `ReservationCreationTest.t04…` | T04 |
-| RG-04 — Plusieurs équipements le même jour | FR-008 | T020 | `ReservationService.reserver` (aucune limite par étudiant) | `ReservationServiceReservationTest.t05DeuxMaterielsLeMemeJour` | T05 |
+| RG-04 — Au plus deux équipements le même jour | FR-008, FR-028 | T020, T044 | `ReservationService.refuserSiLimiteDuJourAtteinte`, verrou d'écriture sur l'étudiant | `LimiteReservationsJourTest` (8 tests) | T05, T13, T14, T15 |
 | RG-05 — Annulation de ses propres réservations | FR-009, FR-010 | T011, T028, T029 | `ReservationService.annuler` (contrôle du propriétaire), `EtudiantCourantService` | `ReservationServiceAnnulationTest.t08…`, `AnnulationNonProprietaireTest` (requête directe) | T06, T08 |
 | RG-06 — Annulation jusqu'au jour réservé inclus | FR-011, FR-012 | T028 | `ReservationService.annuler` (`isBefore(aujourdHui())`) | `ReservationServiceAnnulationTest.annulationLeJourReserveInclus`, `annulationJourPasseRefusee` | T06, T11 |
 | RG-07 — L'annulation conserve l'historique et libère l'équipement | FR-013, FR-014, FR-026 | T006, T028 | `Reservation.annulerParEtudiant` (statut conservé, `cleActive = null`) | `ReservationServiceAnnulationTest.t06…`, `t07…`, `ConflitConcurrentTest.deuxReservationsAnnuleesRestentPossibles` | T06, T07 |
@@ -59,6 +59,7 @@ orphelin.
 | FR-025 — Message distinct si déjà réservé par soi-même | T020, T021 | `MotifRefus.DEJA_RESERVE_PAR_VOUS` | `dejaReserveParSoiMemeMotifDistinct` |
 | FR-026 — Conserver l'origine de l'annulation | T005, T028 | `StatutReservation` (3 états) | `t06AnnulationAutorisee` (`ANNULEE_PAR_ETUDIANT`) |
 | FR-027 — Ne jamais attribuer `ANNULEE_ADMINISTRATIVE` | T005, T035 | `Reservation.annulerParEtudiant` (aucun chemin administratif) | `ReservationServiceAnnulationTest.jamaisAnnuleeAdministrative` |
+| FR-028 — Refus de la troisième réservation du jour | T044 | `ReservationService.refuserSiLimiteDuJourAtteinte` | `LimiteReservationsJourTest.t13…`, `t13DeuxDemandesConcurrentes…` |
 
 **Aucune exigence n'est sans vérification.**
 
@@ -80,6 +81,9 @@ orphelin.
 | T10 | FR-016, FR-019 | `t10DateAbsenteRefusee`, `t10DateIllisibleRefusee` | Conforme |
 | T11 | FR-013, FR-016, FR-026 | `t11DoubleAnnulationSansEffet`, `doubleAnnulationSansEffet` | Conforme |
 | T12 | FR-021 | `t12DeuxDemandesSuccessives`, `ConflitConcurrentTest.deuxDemandesConcurrentes` | Conforme |
+| T13 | FR-008, FR-028 | `LimiteReservationsJourTest.t13TroisiemeReservationRefusee`, `t13DeuxDemandesConcurrentesNeDepassentPasLaLimite` | Conforme |
+| T14 | FR-008, FR-014, FR-028 | `LimiteReservationsJourTest.t14ApresAnnulationReservationPossible` | Conforme |
+| T15 | FR-008 | `LimiteReservationsJourTest.t15AutreJourToujoursPossible` | Conforme |
 
 **Aucun scénario n'est orphelin.**
 
@@ -98,6 +102,8 @@ orphelin.
 | CL-07 — Demandes simultanées | `cle_active` unique + `@Transactional` | `ConflitConcurrentTest.deuxDemandesConcurrentes` |
 | CL-08 — Annulation forgée | Identité issue de la session uniquement | `AnnulationNonProprietaireTest.identifiantForgéNeContournePasLeRefus` |
 | CL-09 — Même matériel, deux dates | Aucune contrainte sur la date seule | `memeMaterielDeuxDatesDifferentes` |
+| CL-10 — Troisième réservation du jour sur un matériel disponible | `MotifRefus.LIMITE_RESERVATIONS_JOUR` | `t13TroisiemeReservationRefusee` |
+| CL-11 — Limite atteinte **et** matériel déjà occupé | Indisponibilité annoncée en priorité | `indisponibiliteAvantLimite` |
 
 ---
 
@@ -112,6 +118,7 @@ orphelin.
 | SC-005 | Cette matrice (aucune ligne sans vérification) | Atteint |
 | SC-006 | `t04…`, `t10…`, `t11…` : message + comptage des lignes | Atteint |
 | SC-007 | `t06…` puis `t07…` | Atteint |
+| SC-008 | `LimiteReservationsJourTest` (8 tests, dont concurrence) | Atteint |
 
 ---
 
@@ -130,9 +137,9 @@ orphelin.
 | Contrôle | Résultat |
 |---|---|
 | Règles RG-01 à RG-09 sans vérification | **Aucune** |
-| Exigences FR-001 à FR-027 sans tâche | **Aucune** |
-| Exigences FR-001 à FR-027 sans vérification | **Aucune** |
-| Scénarios T01 à T12 orphelins | **Aucun** |
-| Cas limites CL-01 à CL-09 sans traitement | **Aucun** |
+| Exigences FR-001 à FR-028 sans tâche | **Aucune** |
+| Exigences FR-001 à FR-028 sans vérification | **Aucune** |
+| Scénarios T01 à T15 orphelins | **Aucun** |
+| Cas limites CL-01 à CL-11 sans traitement | **Aucun** |
 | Décisions CA-01 à CA-03 sans répercussion | **Aucune** |
 | Fonctionnalité hors périmètre implémentée | **Aucune** (l'état `ANNULEE_ADMINISTRATIVE` est modélisé mais non atteignable, conformément à FR-027) |
