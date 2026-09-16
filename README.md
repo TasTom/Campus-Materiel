@@ -118,11 +118,34 @@ authentification.** Chacun peut changer d'étudiant.
 | Chemin | Contenu |
 |---|---|
 | `docs/enonce.md` | Besoin, données, règles RG-01 à RG-09, scénarios T01 à T12 |
-| `.specify/memory/constitution.md` | Principes du projet |
-| `specs/` | Spécification, plan et tâches produits par Spec Kit |
+| `docs/journal-decisions.md` | Décisions prises et propositions de l'IA corrigées, refusées ou précisées |
+| `docs/compte-rendu-recette.md` | Résultats réellement observés pour T01 à T12 |
+| `docs/matrice-tracabilite.md` | Règles et exigences → tâches → vérifications |
+| `.specify/memory/constitution.md` | Principes du projet (version 1.0.0) |
+| `specs/001-reservation-materiel/spec.md` | Spécification fonctionnelle (5 histoires, 27 exigences) |
+| `specs/001-reservation-materiel/plan.md` | Plan technique et contrôle de constitution |
+| `specs/001-reservation-materiel/research.md` | Décisions techniques et alternatives écartées |
+| `specs/001-reservation-materiel/data-model.md` | Modèle de données et transitions d'état |
+| `specs/001-reservation-materiel/contracts/` | Contrat des routes et des messages |
+| `specs/001-reservation-materiel/quickstart.md` | Guide de validation exécutable |
+| `specs/001-reservation-materiel/tasks.md` | Tâches T001 à T045, dépendances et points de contrôle |
+| `specs/001-reservation-materiel/checklists/` | Checklists qualité des exigences |
 | `src/main/java/com/campus/campusmateriel/` | Code de l'application |
+| `src/test/java/com/campus/campusmateriel/` | 67 tests automatisés |
 | `.github/skills/` | Commandes Spec Kit pour GitHub Copilot |
 | `.github/copilot-instructions.md` | Consignes de travail de l'agent |
+
+## Aide-mémoire : où chercher quoi
+
+| Question | Document |
+|---|---|
+| Quelles sont les règles métier ? | `docs/enonce.md` §4 |
+| Comment fonctionne l'application ? | `specs/001-reservation-materiel/spec.md` |
+| Pourquoi ce choix technique ? | `specs/001-reservation-materiel/research.md` |
+| Quelles routes existent ? | `specs/001-reservation-materiel/contracts/routes.md` |
+| Quel message est affiché dans tel cas ? | `specs/001-reservation-materiel/contracts/messages.md` |
+| Où est la règle RG-02 dans le code ? | `ReservationService.refuserSiDejaReserve` (voir `docs/matrice-tracabilite.md`) |
+| Le scénario T08 est-il vérifié ? | `AnnulationNonProprietaireTest` (voir `docs/compte-rendu-recette.md`) |
 
 ## Contradiction entre documents sources
 
