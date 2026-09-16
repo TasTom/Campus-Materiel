@@ -4,7 +4,10 @@
 
 > ## À lire avant de commencer
 >
-> Ce document est un **modèle**. Il n'est **pas** un bilan : il ne contient aucune expérience
+> **Un exemple rédigé est disponible : `docs/bilan-tom-tas.md`.** Il montre à quoi ressemble un
+> bilan qui répond aux six questions avec des références précises au dépôt.
+>
+> Ce document-ci est un **modèle**. Il n'est **pas** un bilan : il ne contient aucune expérience
 > personnelle, parce qu'aucun assistant ne peut écrire ce que vous avez vécu.
 >
 > **Chaque membre du binôme rédige son propre bilan.** Deux bilans identiques seront repérés, et

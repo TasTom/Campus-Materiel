@@ -122,7 +122,8 @@ authentification.** Chacun peut changer d'étudiant.
 | `docs/journal-decisions.md` | Décisions prises et propositions de l'IA corrigées, refusées ou précisées |
 | `docs/compte-rendu-recette.md` | Résultats réellement observés pour T01 à T12 |
 | `docs/matrice-tracabilite.md` | Règles et exigences → tâches → vérifications |
-| `docs/bilan-individuel.md` | Modèle du bilan individuel (à rédiger par chaque membre du binôme) |
+| `docs/bilan-tom-tas.md` | Bilan individuel rédigé (livrable 7) |
+| `docs/bilan-individuel.md` | Modèle du bilan, à utiliser par le second membre du binôme |
 | `.specify/memory/constitution.md` | Principes du projet (version 1.0.0) |
 | `specs/001-reservation-materiel/spec.md` | Spécification fonctionnelle (5 histoires, 27 exigences) |
 | `specs/001-reservation-materiel/plan.md` | Plan technique et contrôle de constitution |
